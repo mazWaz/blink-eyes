@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Manager</title>
+    <style>
+        /* General Styles */
+        html,
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle, #121212, #1a1a1a);
+            color: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(145deg, #222222, #292929);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 10px 0;
+            color: #ffd700;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h1 img {
+            width: 100px;
+            /* Smaller size */
+            height: 100px;
+            /* Smaller size */
+            vertical-align: middle;
+            margin-right: -30px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #f1f1f1;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 5px;
+        }
+
+        .gif-display {
+            flex: 0 0 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .gif-display-wrapper {
+            width: 250px;
+            /* Set fixed width */
+            height: 250px;
+            /* Set fixed height */
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            /* Make the wrapper circular */
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+            text-align: center;
+            overflow: hidden;
+            /* Ensure that the image does not overflow the circular border */
+        }
+
+        .gif-display img {
+            width: 100%;
+            /* Ensure the image fits the width of the container */
+            height: 100%;
+            /* Ensure the image fits the height of the container */
+            object-fit: cover;
+            /* Ensure the image covers the entire area, cropping if necessary */
+            border-radius: 50%;
+            /* Make the image circular */
+            display: block;
+            /* Make sure the image is displayed */
+            margin: 0 auto;
+            /* Center the image horizontally */
+        }
+
+        .placeholder {
+            font-size: 1.2rem;
+            color: #777;
+            margin: 0;
+        }
+
+        .gif-upload {
+            flex: 0 0 15%;
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            font-size: 1rem;
+            color: #ffffff;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            color: #121212;
+            background: linear-gradient(145deg, #ffd700, #e6c200);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .gif-list {
+            flex: 1;
+            width: 100%;
+            max-width: 500px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #1f1f1f, #292929);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            text-align: center;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            transition: transform 0.2s ease, background 0.3s;
+        }
+
+        ul li:hover {
+            transform: scale(1.05);
+            background: #333;
+        }
+
+        ul li img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+        }
+
+        ul li span {
+            color: #ffffff;
+            font-size: 1rem;
+        }
+        button {
+            padding: 10px;
+            font-size: 1rem;
+        }
+       .button-container {
+    display: flex;
+    justify-content: flex-start; /* Align buttons to the left (you can change this to 'center' or 'flex-end' if needed) */
+    gap: 10px; /* Space between the buttons */
+    align-items: center; /* Vertically center the buttons */
+    width: 100%; /* Ensure the container takes up the full width */
+}
+
+#upload-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: #ffd700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+#upload-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(255, 215, 0, 0.5);
+}
+
+#settings-btn {
+    background: transparent; /* Transparent background */
+    border: none;
+    cursor: pointer;
+    padding: 5px; /* Smaller padding for a smaller button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Circular button */ 
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s, box-shadow 0.3s;
+    width: 50px; /* Set a fixed width for the button */
+    height: 50px; /* Set a fixed height for the button */
+}
+
+#settings-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(255, 215, 0, 0.5);
+}
+
+.settings-icon {
+    width: 30px; /* Set a smaller size for the icon */
+    height: 30px;
+}
+
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .gif-display {
+                flex: 0 0 30%;
+            }
+
+            .gif-upload {
+                flex: 0 0 20%;
+                padding: 5px;
+            }
+
+            
+            .gif-list {
+                padding: 10px;
+            }
+
+            ul li img {
+                width: 50px;
+                height: 50px;
+            }
+
+            ul li span {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJMYXllcl8yIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4NDMuODkgNzIwLjU5Ij48ZyBpZD0iTGF5ZXJfMS0yIj48cGF0aCBkPSJNNDMzLjM5LDM5LjcxYzAtMTAuMTUsMC0yMC4zLDAtMzAuNDUsMC03Ljg2LDEuNjgtOS42Miw5LjMzLTkuMiwzOS43OSwyLjE2LDc4Ljk3LDguMjMsMTE3LjUxLDE4LjQ3LDIzLjAyLDYuMTIsNDUuMjQsMTQuMzYsNjcuMjcsMjMuMzgsMTguODIsNy43LDMwLjMyLDIxLjQxLDM3LDM5Ljk5LDcuMTQsMTkuODgsOC44OSw0MC41NCw4LjU3LDYxLjQxLS4zNSwyMy4zNC0zLjQsNDYuNC04LjU0LDY5LjE4LTE2LjYzLDczLjY2LTQ3LjQ4LDE0MC41Mi05NS45LDE5OC43Ny0yNS45NywzMS4yNC01Ni4zOSw1Ny4yNy05Mi45NSw3NS42My0xMS4yOSw1LjY3LTIyLjg1LDEwLjYxLTM0Ljk5LDE0LjEzLTcuMDIsMi4wMy04LjExLjktNy43Ni02LjEuOTItMTguNDEsMS4xMy0zNi44Ni0uMDgtNTUuMjUtLjgtMTIuMTctMS4yLTEyLjA0LDEwLjk4LTEyLjE2LDE3Ljc4LS4xOCwzNS42OCwxLjM3LDUzLjI5LTEuOTcsMzYuNDktNi45NCw2Mi4zOS0yNy43Myw3NS41NC02Mi4zOCwxMC42MS0yNy45Niw3LjYtNTUuNDEtOC4zMS04MS4yNy01LjgzLTkuNDktMTMuMDMtMTcuNTItMjEuMzktMjQuNjktNS42MS00LjgxLTUuNi02LjMzLjExLTExLjE3LDMxLjIyLTI2LjUxLDQzLjc1LTY1LjkzLDMwLjczLTEwMi44My0xMy41Mi0zOC4zMy00MS41MS02MC40MS04MS43OC02Ni4yNS0xNy41MS0yLjU0LTM1LjIzLS44NC01Mi44Ni0uOTctNC41NS0uMDMtNS45OC0xLjE4LTUuODItNS44MS4zNS0xMC4xNC4xMS0yMC4zLjExLTMwLjQ1LS4wMiwwLS4wMywwLS4wNSwwWiIgZmlsbD0iI2Y1ZDAxOSIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTM0MC4wMiw3NS44NWMtMjEuMzEsMC00Mi42MS0uMDItNjMuOTIsMC05LjA5LjAxLTEwLjY5LDEuNi0xMC43MywxMC44Mi0uMDcsMTQuODEtLjA3LDI5LjYyLS4wMyw0NC40NC4wMiw3LjUyLDEuODQsOS44Nyw5LjQ2LDEwLjc0LDI3LjI0LDMuMTIsNDEuNDgsMjQuNzksNDEuMzcsNDguNDYtLjE5LDQxLjExLDAsODIuMjEtLjA0LDEyMy4zMi0uMDMsMjcuMjUtMTcuNDIsNDUuNzgtNDQuNDgsNDguMTItOS4zMi44MS0xOC42Mi4zMy0yNy45Mi42OC0yLjg2LjExLTQuNDYtLjk5LTUuOTMtMy40NS0yNi45My00NS00Ni40MS05Mi45Ni01Ny45LTE0NC4xOC02LjY2LTI5LjctMTAuMzEtNTkuNjQtOC42Mi05MC4wOCwxLjAzLTE4LjU1LDQuMjYtMzYuNjMsMTIuNzgtNTMuNDQsNi41Ny0xMi45NywxNi4zNy0yMi4yLDI5Ljc1LTI4LjE3LDM5Ljc0LTE3LjcyLDgxLjI2LTI5LjA3LDEyNC4wOS0zNi4xNywyMC43LTMuNDMsNDEuNTMtNS41Myw2Mi40NS02LjgzLDguNjMtLjU0LDEwLjA1Ljg0LDEwLjA2LDkuMzguMDMsMjAuNDctLjExLDQwLjk0LjA5LDYxLjQxLjA0LDQtMS4xOCw1LjA2LTUuMDYsNS4wNC0yMS44LS4xNi00My42MS0uMDgtNjUuNDItLjA4WiIgZmlsbD0iI2Y1ZDAxOSIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTQzMy40NywzNjIuNGMtMTMuMTMsMC0yNi4yNy4wMy0zOS40LS4wMi03LjE0LS4wMi05LjA1LTEuODYtOS4wNy04LjcyLS4wNC0xNy42Mi0uMDYtMzUuMjMtLjAzLTUyLjg1LDAtNy4xLDEuODMtOC45MSw4LjgtOC45MSwyNC40NCwwLDQ4Ljg3LS4wNiw3My4zMS4wNyw0LjI5LjAyLDguNjcuMzcsMTIuODMsMS4zMywxNi43NCwzLjgzLDI2LjI5LDE5LjQ5LDIzLjUyLDM4LjMyLS42LDQuMDgtMS4zNCw4LjE1LTMuMDgsMTIuMDEtNS41NSwxMi4zMi0xNC45MiwxOC42OS0yOC40OCwxOC43OC0uMzMsMC0uNjYsMC0xLDAtMTIuNDcsMC0yNC45NCwwLTM3LjQsMFoiIGZpbGw9IiNmNWQwMTkiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik00MzIuNzIsMjExLjA0Yy0xMy40OCwwLTI2Ljk3LjAyLTQwLjQ1LDAtNS4yOC0uMDEtNy4yNS0xLjgzLTcuMjctNy4xNC0uMDctMTguNDctLjA2LTM2Ljk1LjA1LTU1LjQyLjAzLTUuNDcsMi4xLTcuNTcsNy42Ny03LjU5LDI2Ljk3LS4wOCw1My45NC0uMzYsODAuOS4xNCwxNi44MS4zMSwyNy43OCwxMi4zMSwyOS44NiwzMC45NC45Nyw4LjY5LS41NCwxNy00LjY0LDI0LjYzLTUuNTQsMTAuMzItMTUuMDQsMTQuMTYtMjYuMTYsMTQuMzUtMTMuMzEuMjMtMjYuNjMuMDUtMzkuOTUuMDV2LjA0WiIgZmlsbD0iI2Y1ZDAxOSIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTAsNTk4LjVjMC0xMi4zMS0uMDQtMjQuNjIuMDItMzYuOTMuMDMtNS43MSwxLjM1LTcuMDEsNy4xMi03LjAyLDIzLjEzLS4wNCw0Ni4yNS0uMDUsNjkuMzguMDMsNC4xNS4wMSw4LjI2Ljc0LDEyLjIsMi4xOCw0LjgzLDEuNzYsOC41MSw1LDkuNzcsOS45MywyLjU0LDkuOTcsMy44OSwyMC4wNC0zLjExLDI5LjAyLTEuMjMsMS41OC0uODQsMi4yNy4yMiwzLjcxLDcuODcsMTAuNjYsNi40NSwyMi40NCwyLjMzLDMzLjY0LTMuMDksOC40MS0xMS41LDkuOTEtMTkuNjMsOS45OC0xNi4xNC4xMy0zMi4yOC4wNC00OC40MS4wNC03LjQ5LDAtMTQuOTcuMDMtMjIuNDYtLjAxLTYuNDgtLjA0LTcuNDEtMS4wMS03LjQyLTcuNjQtLjAyLTEyLjMxLDAtMjQuNjIsMC0zNi45M1pNNDguNjYsNjIyLjk3czAtLjAxLDAtLjAyYzcuNDksMCwxNC45OC4wNiwyMi40Ny0uMDMsMi43OC0uMDMsNS44Mi4xNCw3LjM1LTMuMDIsMy40LTctLjQyLTEzLjI4LTguMTUtMTMuMzItMTEuOTktLjA1LTIzLjk3LS4wMi0zNS45Ni0uMDItMTIuOCwwLTEyLjcsMC0xMi40LDEyLjgzLjA3LDIuODkuOTMsMy42OCwzLjcxLDMuNjIsNy42NS0uMTYsMTUuMzEtLjA2LDIyLjk3LS4wNlpNNDguMjksNTg5Ljc2di4wMmM3LjgsMCwxNS42LjEzLDIzLjQtLjA0LDYuMDUtLjEzLDcuMzUtMS42Myw3LjI2LTcuNDctLjA5LTUuOTQtMS42NS03LjQ3LTguNDQtNy41My0xMi40NS0uMTEtMjQuOS0uMDMtMzcuMzUtLjA0LTExLjksMC0xMS43OS0uMDEtMTEuMzUsMTEuODYuMSwyLjc5LDEuMTYsMy4yOCwzLjU4LDMuMjQsNy42NC0uMTEsMTUuMjctLjA0LDIyLjkxLS4wNFoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0yNjYuMzQsNTc2LjQ3Yy0xLjM1LDIuNjUtLjkyLDQuNjQtLjkyLDYuNTctLjAyLDE3LjgsMCwzNS42LDAsNTMuNCwwLDUuNy0uOTEsNi42LTYuNjksNi42My0zLjMzLjAyLTYuNjYtLjA0LTkuOTgtLjAzLTMuMjgsMC00Ljg5LTEuNTMtNC44OC00Ljg3LjA1LTI0LjEyLS4wNS00OC4yNC4xOS03Mi4zNi4wNy03LjI5LDQuMDMtMTAuODEsMTEuMjktMTEuMjYuNS0uMDMsMSwwLDEuNSwwLDIxLjkxLS4wNywxOC44Ni0xLjEyLDMxLjY0LDE1LjY0LDEyLjI5LDE2LjEzLDI0LjU5LDMyLjI1LDM2Ljg5LDQ4LjM3LjU4Ljc2LDEuMjcsMS40NCwxLjk1LDIuMjIsMS44Mi0xLjQxLjkzLTMuMi45NC00LjY5LjA3LTE4LjEzLjAxLTM2LjI3LjA0LTU0LjQsMC02LjE4LDEuMDItNy4xMyw3LjMzLTcuMTMsMTUuODUsMCwxNC4yNC0xLjQsMTQuMjUsMTQuMDkuMDIsMjAuMTMuMDIsNDAuMjYtLjAyLDYwLjM5LS4wMiwxMC41OC0zLjU3LDEzLjMzLTE0LjEsMTQuMjctMTIuODgsMS4xNS0yMS43NS0yLjk0LTI5LjMxLTEzLjk1LTEyLjM4LTE4LjA0LTI2LjQtMzQuOTUtNDAuMTMtNTIuODZaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNODI0LjM3LDYxMy44OWM1LjgxLDcuMjEsMTEuMzMsMTQuMDMsMTYuODEsMjAuODgsMS40MiwxLjc3LDMuNDgsMy40MSwyLjQzLDYuMDktMS4xNCwyLjkxLTMuODMsMi4xMy02LjA1LDIuMTctMTUuOTcuMjktMTYuNzguNzktMjUuMzctMTIuNjgtNy4xNC0xMS4xOC0xNS41NC0xNi41My0yOC44Mi0xNC4yNi00LjY5LjgtOS42NS40My0xNC40NS4wNC0zLjk5LS4zMi00LjczLDEuMjctNC41NSw0Ljc5LjI3LDUuNDgtLjAxLDEwLjk4LjA5LDE2LjQ3LjA3LDQtMS42OSw1LjgxLTUuNzEsNS42OC0zLjgyLS4xMy03LjY1LS4wNi0xMS40OC0uMDYtMy4zLDAtNC44Mi0xLjYyLTQuODItNC45NC4wMy0yNS45Ni4wMi01MS45MSwwLTc3Ljg3LDAtMy40LDEuNjMtNS42MSw1LTUuNTcsMjQuNjEuMjUsNDkuMjUtMS4zMiw3My44MS44MSwxMC41My45MiwxNi45NCw3LjQsMTguNzgsMTcuNzEsMS4zOCw3LjczLDEuMjcsMTUuNi4wNSwyMy4zNi0xLjM5LDguODQtNi44OCwxNC40LTE1LjcxLDE3LjM3Wk03ODkuMDEsNTc0LjU2Yy02Ljk4LDAtMTMuOTUuMS0yMC45My0uMDUtMi43OS0uMDYtMy44My44LTMuNzIsMy42OC4yLDUuMzEuMiwxMC42MywwLDE1Ljk0LS4xMSwyLjk4Ljc2LDQuMTIsMy45LDQuMDEsNi4zLS4yMiwxMi42Mi0uMDYsMTguOTMtLjA3LDcuNDcsMCwxNC45NS4xOSwyMi40Mi0uMDgsNy4wNy0uMjYsOS4wMi0yLjQ4LDkuMzEtOS40OC4wNS0xLjE2LjA1LTIuMzIuMDMtMy40OS0uMTUtNy45NS0yLjQ4LTEwLjMyLTEwLjUyLTEwLjQ1LTYuNDgtLjEtMTIuOTUtLjAyLTE5LjQzLS4wMVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik00MTAuNTEsNDY1LjI1YzAsMTAuNjUuMDEsMjEuMywwLDMxLjk1LDAsNi4xMS0uMDUsNi4xOC02LjA5LDQuMzItMzcuNjEtMTEuNTctNjkuOTctMzIuMDItOTguNzgtNTguNDQtNC40MS00LjA0LTguNjItOC4zLTEyLjg4LTEyLjUxLS42NC0uNjQtMS44NS0xLjI0LTEuMzYtMi4zOC41LTEuMTYsMS43Ny0uNiwyLjY4LS42MSw5LjY1LS4wNSwxOS4zMS0uMDUsMjguOTYtLjA1LDI3LjQ2LDAsNTQuOTMuMDksODIuMzktLjA5LDQuMjItLjAzLDUuMywxLjI3LDUuMTksNS4zNi0uMjgsMTAuODEtLjEsMjEuNjMtLjEsMzIuNDVoLS4wMloiIGZpbGw9IiNmNWQwMTkiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik03MjMuNDMsNjQzLjA1Yy03LjI5LDIuMjItMTIuMTItMS44OS0xNC43Mi05LjQyLTIuMjItNi40MS02LjM0LTguMjgtMTMuMTQtNy45Ny0xMy45NS42My0yNy45NC4yOC00MS45MS4wOS0zLjI5LS4wNS00Ljg2LDEuMDgtNi40OCwzLjk0LTkuMTQsMTYuMTItMy4yMSwxMy4wNS0yMS45OCwxMy4zOC0xLC4wMi0yLC4wNC0yLjk5LS4wMi00LjUzLS4yNi01LjY4LTIuMDgtMy41My02LjA5LDYuMTMtMTEuNCwxMi4zOC0yMi43MywxOC41OC0zNC4xLDYuNi0xMi4xLDEzLjMyLTI0LjEzLDE5Ljc2LTM2LjMxLDYuNDQtMTIuMiwxMi4xLTEzLjg0LDI4LTExLjA1LDQuOTUuODcsNy42Nyw0Ljk4LDkuOTcsOS4xNSwxMy4wNywyMy42OSwyNi4xNCw0Ny4zOCwzOS4xNyw3MS4wOSwzLjExLDUuNjYsMi4wNyw3LjI3LTQuNTQsNy4zMi0xLjY2LjAxLTMuMzMsMC02LjE4LDBaTTY5NC44Miw2MDguMTZjLTYuMTYtMTEuMzEtMTEuOTEtMjEuODUtMTguMTQtMzMuMjgtNi4xNCwxMS41MS0xMS44NCwyMi4xOS0xNy43NSwzMy4yOGgzNS44OVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik01NzguNTYsNjQyLjc1Yy0xMC4zMSwwLTIwLjY3LjU5LTMwLjk0LS4xMy0xOC45Ni0xLjMzLTI3LjAzLTkuOTEtMjguMDMtMjguODItLjU3LTEwLjgtLjU0LTIxLjYzLjE0LTMyLjQzLjk2LTE1LjIsOS40OS0yNC4xLDI0LjU1LTI2LjAxLDQuNjMtLjU5LDkuMjUtLjg5LDEzLjkzLS44NywxNi4zMS4wNywzMi42MiwwLDQ4Ljk0LjA0LDYuMTkuMDEsNy4xNywxLjA1LDcuMiw3LjI5LjA4LDE1LjY3LjU2LDEzLjQzLTEzLjMxLDEzLjUxLTE0Ljk4LjA5LTI5Ljk2LS4wMy00NC45NC4wNS0xMS44Ny4wNi0xNC42MywyLjgzLTE0Ljc0LDE0LjgxLS4wNyw3LjE1LS4xOCwxNC4zMi4yNiwyMS40NS40OSw3Ljg4LDMuNSwxMC41MywxMS40NiwxMC41OCwxNy4zMS4xMSwzNC42Mi4wNSw1MS45My4wNSw4LjkxLDAsOS4yOC4zNiw5LjM1LDkuMjJxLjA5LDExLjU2LTExLjM0LDExLjU5Yy04LjE2LjAxLTE2LjMxLDAtMjQuNDcsMCwwLS4xMSwwLS4yMiwwLS4zM1oiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0zODQuNzIsNjI0LjM5YzAsNC40OS0uMDUsOC45OC4wMiwxMy40Ny4wNiwzLjUyLTEuNTQsNS4yNC01LjA5LDUuMi0zLjk5LS4wNS03Ljk4LS4wMy0xMS45OC0uMDEtMy4yOS4wMS00Ljg2LTEuNTUtNC44Ni00Ljg4LjAyLTI2LjExLjAyLTUyLjIyLS4wMi03OC4zMywwLTMuODUsMS45My01LjM3LDUuNTctNS4zMSwzLjQ5LjA1LDYuOTkuMTMsMTAuNDgtLjAzLDQuMzItLjE5LDUuOTksMS45MSw1Ljk1LDYuMDItLjA4LDguNDguMDcsMTYuOTctLjEyLDI1LjQ0LS4wNiwyLjc2LjYyLDMuODksMy41MywzLjYyLDIuNjQtLjI0LDUuMzgtLjQxLDcuOTcsMCw5LjUsMS41NSwxNS42Mi0yLjY4LDIwLjU4LTEwLjQ2LDQuNjMtNy4yNiwxMC4yOC0xMy44NywxNS4zMy0yMC44OCwxLjk0LTIuNjksNC4yMi0zLjk0LDcuNTYtMy43NiwzLjk4LjIxLDcuOTguMDYsMTEuOTcuMDQsMS44NywwLDMuNywwLDQuNzEsMi4wMSwxLjAxLDIuMDEtLjA0LDMuNTEtMS4xOCw0Ljk5LTguNTUsMTEuMDMtMTcsMjIuMTQtMjUuNzYsMzMtMi4wNSwyLjU0LTEuODYsMy41NC4zMyw1LjkxLDEwLjU3LDExLjUxLDE5LjY4LDI0LjIzLDI5LjMzLDM2LjUxLDIuNDEsMy4wNy44NCw1LjkyLTMuMDUsNi4wNS01LjE1LjE3LTEwLjMxLS4wNC0xNS40Ni4wNC0yLjc3LjA1LTQuMTQtMS44MS01LjU3LTMuNjUtNi44My04Ljc5LTEzLjc0LTE3LjUyLTIwLjQtMjYuNDQtMi45NS0zLjk1LTYuNTUtNS44Ny0xMS40My01Ljc4LTQuODIuMS05LjY2LjE5LTE0LjQ3LS4wNy0zLS4xNi00LjE3LjYxLTMuOTgsMy44MS4yNyw0LjQ3LjA3LDguOTguMDcsMTMuNDdoLS4wNFoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0xNjYuNjIsNjQzLjA4Yy04LjI4LS4yMy0xOC4yOS41OS0yOC4yNC0uNTEtMTcuNTktMS45NC0yNS44OC05LjkyLTI2LjY2LTI3LjYtLjgxLTE4LjQ0LS4zLTM2LjkzLS4zNC01NS40LDAtMy41NiwxLjk4LTUuMDYsNS4zOS01LjA0LDMuNDkuMDIsNywuMTMsMTAuNDgtLjA0LDQuNTktLjIzLDYuMTQsMS45Myw2LjEsNi4zMi0uMTQsMTMuOTgtLjA2LDI3Ljk1LS4wNiw0MS45MywwLDIuMTYsMCw0LjMzLjA4LDYuNDkuMzQsMTAuMDgsMy4zLDEyLjk5LDEzLjM5LDEzLjAyLDE1LjgxLjA1LDMxLjYyLDAsNDcuNDMuMDQsNi4zNy4wMSw3LjIuODMsNy4yMiw3LjE2LjA2LDE1LjQ3LDEuMjIsMTMuNTMtMTMuNjEsMTMuNjItNi40OS4wNC0xMi45OCwwLTIxLjE3LDBaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNMjA5LjA0LDU5OC44NGMwLTEyLjQ3LS4wMS0yNC45NSwwLTM3LjQyLDAtNS45Ni45Mi02Ljg0LDcuMDEtNi44NywzLjE2LS4wMiw2LjMyLjA0LDkuNDgsMCwzLjctLjA2LDUuNTMsMS42NCw1LjUzLDUuNC0uMDMsMjUuOTUtLjA0LDUxLjksMCw3Ny44NCwwLDMuNTQtMS41Niw1LjI2LTUuMDUsNS4yOC0zLjgzLjAyLTcuNjUtLjA1LTExLjQ4LjAzLTQuMDYuMDktNS41Ni0xLjgzLTUuNTEtNS44Mi4xMy0xMi44MS4wNS0yNS42MS4wNS0zOC40MmgtLjAzWiIgZmlsbD0iI2Y2ZjVmNCIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTI4MC4wOCw3MjAuMzdjLTQuNS4wMS04Ljk5LS4xNC0xMy4zNC0xLjQyLTIuMzktLjcxLTQuODUtMS40Ni02LjQzLTMuNTUtMS41Ny0yLjA4LTMuOTQtNS40LTEuNzUtNi44LDEuOTctMS4yNiw2LjMzLTIuNDksOC43MSwxLjM1LDEuMDQsMS42OCwyLjc1LDIuMzIsNC42MSwyLjY1LDUuNjEsMS4wMiwxMS4yNi43OSwxNi44Ny4yNCwxLjkxLS4xOSw0LjIxLS44Miw0LjIxLTMuNDEsMC0yLjY5LTIuMjgtMi45LTQuMjctMy4yMS02Ljg5LTEuMDktMTMuOTctLjMzLTIwLjc5LTItMy43Ni0uOTItNy40OS0yLjE1LTguNzItNi40Ny0xLjUtNS4yNS42Ny05Ljc1LDYuMS0xMS4zNiw5LjA5LTIuNzEsMTguMzMtMi42MiwyNy40OS0uMDYsMi4xLjU5LDMuOTEsMS44LDUuNDIsMy40MiwxLjY4LDEuOCwzLjMxLDQuODEsMS43OCw2LjA5LTIuMDgsMS43NC01Ljc1LDEuNzYtOC4yNC0uMjEtNC40LTMuNDYtMTcuMjMtNS40Mi0yMS45OC0zLjAxLTEuMTEuNTctMS45MywxLjMtMS44MywyLjY3LjE0LDEuODksMS42MywyLjUyLDMuMDgsMi43LDMuOTUuNDksNy45My44NywxMS45LDEuMDgsNC4xNi4yMSw4LjI5LjU2LDEyLjMyLDEuNjcsMy44MiwxLjA2LDYuNTMsMy4xNyw2Ljg0LDcuNDkuMzIsNC40My0xLjI2LDcuNzMtNS4zOCw5LjcyLTMuMzUsMS42My04LjQxLDIuNDQtMTYuNjIsMi40M1oiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik00NDAuMTEsNzAyLjM5YzAtNC42NS4xMS05LjMxLS4wNC0xMy45NS0uMDgtMi41OC43OC0zLjQ0LDMuNDEtMy4zOCw3LjguMTcsMTUuNjItLjA2LDIzLjQyLjEzLDguOTcuMjIsMTUuMDksNi42MSwxNS43LDE2LjA0LjYxLDkuMzMtNC43NCwxNy4zNS0xMy4zNSwxOC4xNS04LjkuODMtMTcuOTIuMzItMjYuODguNDQtMi4yMS4wMy0yLjI4LTEuNC0yLjI3LTIuOTkuMDEtNC44MiwwLTkuNjMsMC0xNC40NVpNNDQ5LjM5LDcwMi4yN3EuMDgsOS45NywxMC4xMyw5Ljk3YzEuNDksMCwyLjk5LjAzLDQuNDgsMCw2LjY0LS4xOCw5LjY2LTMuMzIsOS42MS05Ljk1LS4wNS02LjQxLTIuOS05LjIyLTkuNTEtOS4zNS0xLjgyLS4wNC0zLjY1LDAtNS40NywwcS05LjMsMC05LjIzLDkuMzRaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNNTQ5LjMxLDcyMC41OWMtMi42NC0uMzEtNS4zMi0uNDItNy45LS45OC0xMC4yNC0yLjE5LTE0LjI2LTcuODktMTMuNzQtMTkuMjMuNC04Ljc1LDUuNzYtMTMuOTQsMTUuMzMtMTUuMzUsNC42OS0uNjksOS4yNi0uNTUsMTMuODkuMTUsOC44NiwxLjM0LDE0LDcuMDksMTQuNDUsMTYuMy40Niw5LjM2LTMuOTMsMTUuNTYtMTIuNiwxNy44LTMuMDguNzktNi4yMiwxLjE1LTkuNDIsMS4zWk01NDguNjcsNjkyLjE2Yy0uNDYuMDItMS42My0uMDEtMi43OC4xNC02LjM1Ljg1LTkuMjEsMy43OC05LjM3LDkuNTUtLjE5LDYuNTIsMi40NSw5Ljc4LDkuMDksMTAuOCwyLjI3LjM1LDQuNjcuNCw2Ljk0LjEsNy43OS0xLjA1LDExLjE2LTYuMjEsOS4yMy0xMy44NC0xLjE5LTQuNzMtNC45LTYuNzUtMTMuMTEtNi43NVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0zNzcuOTUsNjk2LjQ4YzAtMi4xNi4yOC00LjM3LS4wNi02LjQ4LS43My00LjUxLDEuNDMtNS4xNCw1LjI4LTUuMDIsMy4wNy4xLDQuMDMuOTUsMy44NSw0LjAxLS4yNiw0LjQ4LS4xMyw4Ljk4LS4wNCwxMy40Ny4xMiw2LjA1LDIuMzYsOC42Nyw4LjMxLDEwLjAxLDIuOC42Myw1LjU5LjY2LDguNDEuMTQsNi40Ny0xLjIxLDguODctMy45Miw4Ljk5LTEwLjQ0LjA5LTQuNjYuMjItOS4zMy0uMDUtMTMuOTctLjI0LTQuMDUsMi41LTMuMDYsNC42LTMuMDcsMi4xMi0uMDEsNC44OC0uOTQsNC41NywzLjExLS40OCw2LjI4LjQ5LDEyLjYxLS42MSwxOC44OS0xLjIyLDYuOTQtNS41LDEwLjcxLTEyLjEsMTIuMjQtNS43NSwxLjMzLTExLjU1LDEuNDItMTcuMzMuMjctOS4yOS0xLjg1LTEzLjY2LTcuMTctMTMuODEtMTYuNjgtLjAzLTIuMTYsMC00LjMyLDAtNi40OVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0zMzguNzYsNjg1LjExYzUuOTgsMCwxMS45Ny4xNCwxNy45NC0uMDYsMi44Ni0uMDksMy4zNiwxLjIsMy4xOCwzLjU4LS4xNiwyLjA2LjYzLDQuNjUtMi45Nyw0LjMtLjMzLS4wMy0uNjctLjAzLTEsMC00LjIzLjM1LTEwLjA0LTEuOTMtMTIuMjkuOTYtMi4xMSwyLjcxLS42Miw4LjI1LS42NywxMi41NC0uMDQsMi42NiwwLDUuMzItLjAxLDcuOTcsMCw1LjM2LTEuOTcsNi43NC03LjI0LDUuNDUtMi4yMy0uNTQtMS43OC0yLjA2LTEuNzktMy40NS0uMDQtNi42NS0uMTctMTMuMy4wNS0xOS45My4wOS0yLjg4LS44Mi0zLjc5LTMuNjMtMy42MS0zLjMxLjIxLTYuNjUtLjEtOS45Ni4xMS0zLjE3LjItMy40Mi0xLjQ1LTMuMzgtMy45Ny4wNS0yLjQxLjAzLTQuMDksMy4zMi0zLjk1LDYuMTQuMjUsMTIuMjkuMDcsMTguNDQuMDdaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNNTA5LjcsNzAyLjZjMCw0LjMyLS4yNCw4LjY2LjA3LDEyLjk2LjI3LDMuNjctMS4xNiw0LjQ1LTQuNTQsNC4zNi0zLjEtLjA4LTQuODItLjI1LTQuNjgtNC4xOS4zMi04Ljk2LjMyLTE3Ljk1LS4wMi0yNi45Mi0uMTUtMy45OCwxLjk0LTMuOCw0LjU3LTMuNjksMi4zOC4xLDUuMDktLjc4LDQuNywzLjUzLS40Miw0LjYyLS4wOSw5LjMtLjA5LDEzLjk1WiIgZmlsbD0iI2Y2ZjVmNCIgc3Ryb2tlLXdpZHRoPSIwIi8+PC9nPjwvc3ZnPg=="
+                alt="Logo"> link Eyes</h1>
+
+        <div class="gif-display">
+            <div class="gif-display-wrapper">
+                <img id="current-gif" src="" alt=" ">
+            </div>
+        </div>
+
+        <div class="gif-upload">
+            <h2>Upload GIF</h2>
+            <input type="file" id="gif-input" accept="image/gif">
+        <div class="button-container">
+            <button id="upload-btn">Upload</button>
+            <button id="settings-btn">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB4PSIwIiB5PSIwIiB2aWV3Qm94PSIwIDAgNTQ4LjI1IDU0OC4yNSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgY2xhc3M9IiI+PGc+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMzQxLjI5MiAxNy42NzJzMTkuMDk5IDU1LjQxMiAxOS4wOTkgNTUuMzg2YTIxNy4zODcgMjE3LjM4NyAwIDAgMSA0NC43MDIgMjUuODMxbDU3LjU1My0xMS4xNjljNi42ODEtMS4zIDEzLjU2NiAxLjA3MSAxOC4wNTQgNi4xOTdhMjc0LjM1MyAyNzQuMzUzIDAgMCAxIDUyLjc2IDkxLjQxNyAxOS4xMyAxOS4xMyAwIDAgMS0zLjY0NyAxOC43NDJzLTM4LjQyOCA0NC4yNDItMzguNDI4IDQ0LjIxN2EyMTguNjA2IDIxOC42MDYgMCAwIDEgMCA1MS42MzdsMzguNDI4IDQ0LjI0MmExOS4xMyAxOS4xMyAwIDAgMSAzLjY0NyAxOC43NDIgMjc0LjM0MyAyNzQuMzQzIDAgMCAxLTUyLjc2IDkxLjQxN2MtNC40ODggNS4xMjYtMTEuMzczIDcuNDk3LTE4LjA1NCA2LjE5NyAwIDAtNTcuNTUzLTExLjE2OS01Ny41MjgtMTEuMTY5YTIxNy41OTUgMjE3LjU5NSAwIDAgMS00NC43MjcgMjUuODA2bC0xOS4wOTkgNTUuNDExYTE5LjE0MiAxOS4xNDIgMCAwIDEtMTQuMzgyIDEyLjU0NiAyNzQuMzY2IDI3NC4zNjYgMCAwIDEtMTA1LjU3IDAgMTkuMTQyIDE5LjE0MiAwIDAgMS0xNC4zODItMTIuNTQ2cy0xOS4wOTktNTUuNDExLTE5LjA5OS01NS4zODZhMjE3LjM0NiAyMTcuMzQ2IDAgMCAxLTQ0LjcwMi0yNS44MzJMODUuNjA0IDQ2MC41M2MtNi42ODEgMS4zMDEtMTMuNTY2LTEuMDcxLTE4LjA1NC02LjE5N2EyNzQuMzQ3IDI3NC4zNDcgMCAwIDEtNTIuNzYtOTEuNDE4IDE5LjEzIDE5LjEzIDAgMCAxIDMuNjQ2LTE4Ljc0MnMzOC40MjktNDQuMjQyIDM4LjQyOS00NC4yMTdhMjE4LjYxNSAyMTguNjE1IDAgMCAxIDAtNTEuNjM4bC0zOC40MjgtNDQuMjQyYTE5LjEzMyAxOS4xMzMgMCAwIDEtMy42NDctMTguNzQyIDI3NC4zNzIgMjc0LjM3MiAwIDAgMSA1Mi43NTktOTEuNDE4YzQuNDg4LTUuMTI2IDExLjM3My03LjQ5NyAxOC4wNTQtNi4xOTYgMCAwIDU3LjU1MyAxMS4xNjkgNTcuNTI4IDExLjE2OWEyMTcuNjIgMjE3LjYyIDAgMCAxIDQ0LjcyNy0yNS44MDZsMTkuMDk5LTU1LjQxMWExOS4xNDIgMTkuMTQyIDAgMCAxIDE0LjM4Mi0xMi41NDYgMjc0LjM2NiAyNzQuMzY2IDAgMCAxIDEwNS41NyAwIDE5LjE0IDE5LjE0IDAgMCAxIDE0LjM4MyAxMi41NDZ6TTI3NC4xMjUgMTYxLjM5Yy02Mi4yMiAwLTExMi43MzYgNTAuNTE1LTExMi43MzYgMTEyLjczNnM1MC41MTUgMTEyLjczNSAxMTIuNzM2IDExMi43MzVTMzg2Ljg2IDMzNi4zNDUgMzg2Ljg2IDI3NC4xMjUgMzM2LjM0NSAxNjEuMzkgMjc0LjEyNSAxNjEuMzl6bTAgMzguMjVjNDEuMTA2IDAgNzQuNDg1IDMzLjM4IDc0LjQ4NSA3NC40ODVzLTMzLjM3OSA3NC40ODUtNzQuNDg1IDc0LjQ4NS03NC40ODUtMzMuMzc5LTc0LjQ4NS03NC40ODUgMzMuMzc5LTc0LjQ4NSA3NC40ODUtNzQuNDg1eiIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjZmZmZmZmIiBvcGFjaXR5PSIxIiBkYXRhLW9yaWdpbmFsPSIjMDAwMDAwIj48L3BhdGg+PC9nPjwvc3ZnPg==" alt="Settings Icon" class="settings-icon">
+            </button>
+        </div>
+            
+        </div>
+        <h2>Uploaded GIFs</h2>
+        <div class="gif-list">
+            <ul id="gif-list">
+                <p class="placeholder">No GIFs uploaded yet.</p>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const gifInput = document.getElementById('gif-input');
+        const uploadButton = document.getElementById('upload-btn');
+        const gifList = document.getElementById('gif-list');
+        const currentGif = document.getElementById('current-gif');
+        const placeholderText = document.querySelector('.placeholder');
+
+        let uploadedGifs = [];
+
+        // Event Listener for Upload Button
+        uploadButton.addEventListener('click', () => {
+            const file = gifInput.files[0];
+
+            if (file && file.type === 'image/gif') {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const gifUrl = event.target.result;
+
+                    // Add to uploaded GIFs list
+                    uploadedGifs.push(gifUrl);
+                    displayGifList();
+
+                    // Set the current GIF
+                    currentGif.src = gifUrl;
+                    currentGif.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select a valid GIF file.');
+            }
+        });
+
+        // Function to Display Uploaded GIFs in the List
+        function displayGifList() {
+            gifList.innerHTML = '';
+            if (uploadedGifs.length === 0) {
+                gifList.innerHTML = `<p class="placeholder">No GIFs uploaded yet.</p>`;
+                return;
+            }
+            uploadedGifs.forEach((gifUrl, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <img src="${gifUrl}" alt="GIF ${index + 1}">
+                    <span>GIF ${index + 1}</span>
+                `;
+                gifList.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+
+</html>

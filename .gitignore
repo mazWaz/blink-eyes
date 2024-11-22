@@ -1,0 +1,7 @@
+.pio
+node_modules
+/.browse.c_cpp.db*
+.vscode 
+/ c_cpp_properties.json
+/launch.json
+/ ipch
