@@ -317,6 +317,7 @@
     </div>
 
     <script>
+        const esp32Ip = "http://4.3.2.1";
         const gifInput = document.getElementById('gif-input');
         const uploadButton = document.getElementById('upload-btn');
         const gifList = document.getElementById('gif-list');
@@ -351,6 +352,68 @@
             }
         });
 
+        async function fetchData(){
+
+            try{
+                const response = await fetch(`${esp32Ip}/list`);
+                const data = await response.text();
+                const files = data.split("\n").filter(file => file.endsWith('.gif'));
+                  if (files.length === 0) {
+                    fileList.innerHTML = "<li>No GIF files found on the SD card.</li>";
+                } else {
+                     placeholderText.style.display = 'none';
+                     files.forEach((file, index) => {
+                          const listItem = document.createElement("li");
+                          listItem.classList.add("file-item");
+                          listItem.innerHTML = `
+                    <div>
+                        <img id="img-${index}" src="placeholder.jpg" alt="Loading GIF..." width="100">
+                        <span>${file}</span>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="viewFile('${file}')">SET</button>
+                        <button class="btn btn-danger" onclick="deleteFile('${file}')">Delete</button>
+                    </div>
+                `;
+                          gifList.appendChild(listItem);
+                          uploadedGifs.push(`img-${index}`);
+                      });
+                       for (let i = 0; i < files.length; i++) {
+                          const file = files[i];
+                          const imgElementId = uploadedGifs[i];
+                          const imgElement = document.getElementById(imgElementId);
+
+                          try {
+                              await loadImage(`${esp32Ip}/${file}`);
+                              imgElement.src = `${esp32Ip}/${file}`;
+                          } catch (imgError) {
+                              console.error(`Failed to load image ${file}:`, imgError);
+                              imgElement.src = "error-placeholder.jpg";
+                              imgElement.alt = "Failed to load image.";
+
+                              const errorMsg = document.createElement("li");
+                              errorMsg.classList.add("error-item");
+                              errorMsg.textContent = `Failed to load image: ${file}`;
+                              fileList.appendChild(errorMsg);
+                          }
+                      }
+                }
+            }catch{
+               
+
+            }
+
+        }
+
+        function loadImage(url) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve();
+                    img.onerror = () => reject(new Error(`Failed to load image at ${url}`));
+                    img.src = url;
+                });
+            }
+
         // Function to Display Uploaded GIFs in the List
         function displayGifList() {
             gifList.innerHTML = '';
@@ -367,6 +430,7 @@
                 gifList.appendChild(listItem);
             });
         }
+        fetchData();
     </script>
 </body>
 

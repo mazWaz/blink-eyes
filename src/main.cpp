@@ -4,14 +4,17 @@
 #include <webService/webservice.h>
 
 Communication com;
-WebService web;
+SFS sd;
+WebService web(sd);
 Display display;
 
 void setup() {
     Serial.begin(115200);
-    display.init();
+    sd.init();
     com.init();
     web.init();
+    delay(2000);
+    display.init();
 }
 
 void loop() {

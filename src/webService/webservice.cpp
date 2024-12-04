@@ -4,9 +4,13 @@
 
 const char WebService::s_content_enc[] PROGMEM = "Content-Encoding";
 
-WebService::WebService() : server(80) {}
+WebService::WebService(SFS &fs) : server(80), _fs(fs) {}
 void WebService::init() {
     dnsRequest();
+    pageRequest();
+    imageRequest();
+    server.serveStatic("/", SD, "/");
+
     server.begin();
 }
 
@@ -14,14 +18,9 @@ void WebService::loop() {}
 
 void WebService::setStaticContentCacheHeaders(
     AsyncWebServerResponse *response) {
-    char tmp[12];  // Temporary buffer for generating cache headers
-
+    char tmp[12];
     response->addHeader(F("Cache-Control"), "no-cache");
-
-    // Setting the ETag header (For example, using some value or checksum in
-    // `tmp`)
-    response->addHeader(F("ETag"),
-                        tmp);  // Assuming `tmp` is filled with a value
+    response->addHeader(F("ETag"), tmp);
 }
 
 void WebService::dnsRequest() {
@@ -50,77 +49,70 @@ void WebService::dnsRequest() {
         request->send(200, "text/plain", "Microsoft NCSI");
     });
 
-    // server.onNotFound([](AsyncWebServerRequest *request) {
-    //     request->send(200, "text/html", htmlContent);
-    // });
+    server.onNotFound([this](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response = request->beginResponse_P(
+            200, "text/html", PAGE_index, PAGE_index_L);
+
+        response->addHeader(FPSTR(s_content_enc), "gzip");
+        this->setStaticContentCacheHeaders(response);
+        request->send(response);
+    });
 }
 
-void WebService::pageRequest() {}
+void WebService::pageRequest() {
+    server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response;
+        response = request->beginResponse_P(200, "text/html", PAGE_index,
+                                            PAGE_index_L);
+
+        response->addHeader(FPSTR(s_content_enc), "gzip");
+        this->setStaticContentCacheHeaders(response);
+        request->send(response);
+    });
+}
 
 void WebService::apiRequest() {}
 
 void WebService::imageRequest() {
-    server.on(  // Get Image
-        "/image", HTTP_GET, [](AsyncWebServerRequest *request) {
-            if (request->hasParam("name")) {
-                String filename = "/" + request->getParam("name")->value();
-                // if (SD.exists(filename)) {
-                //     File file = SD.open(filename);
-                //     request->send(SD, filename, "application/octet-stream");
-                //     file.close();
-                // } else {
-                //     request->send(404, "text/plain", "File not found");
-                // }
-            } else {
-                request->send(400, "text/plain", "File name not specified");
-            }
-        });
-    server.on(  // Get Upload
-        "/image", HTTP_POST,
-        [](AsyncWebServerRequest *request) {
-            request->send(200, "text/plain", "Upload completed");
-        },
-        [](AsyncWebServerRequest *request, String filename, size_t index,
-           uint8_t *data, size_t len, bool final) {
-            if (!index) {
-                // If this is the start of a new file
-                Serial.printf("Uploading file: %s\n", filename.c_str());
-                // if (SD.exists("/" + filename)) {
-                //     SD.remove("/" + filename);
-                // }
-                // File file = SD.open("/" + filename, FILE_WRITE);
-                // if (!file) {
-                //     Serial.println("Failed to open file for writing");
-                //     return;
-                // }
-                // file.close();
-            }
-            // Write data to the file
-            // File file = SD.open("/" + filename, FILE_APPEND);
-            // if (file) {
-            //     file.write(data, len);
-            //     file.close();
-            // }
-            // if (final) {
-            //     // If this is the end of the file
-            //     Serial.printf("Upload finished: %s, size: %u bytes\n",
-            //                   filename.c_str(), index + len);
-            // }
-        });
+    server.on("/list", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        String fileList = _fs.listFiles();
+        request->send(200, "text/plain", fileList);
+    });
 
-    server.on(  // Get Upload
-        "/image", HTTP_DELETE, [](AsyncWebServerRequest *request) {
-            if (request->hasParam("name")) {
-                String filename = "/" + request->getParam("name")->value();
-                // if (SD.exists(filename)) {
-                //     SD.remove(filename);
-                //     request->send(200, "text/plain", "File deleted
-                //     successfully");
-                // } else {
-                //     request->send(404, "text/plain", "File not found");
-                // }
+    server.on("/image", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        if (request->hasParam("filename")) {
+            String filename = request->getParam("filename")->value();
+            if (_fs.exists("/" + filename)) {
+                File file = SD.open(filename);
+                AsyncWebServerResponse *response =
+                    request->beginResponse(SD, filename, "image/gif");
+                response->addHeader("Content-Disposition",
+                                    "inline; filename=" +
+                                        request->getParam("filename")->value());
+                request->send(response);
+                file.close();
             } else {
-                request->send(400, "text/plain", "File name not specified");
+                request->send(404, "text/plain", "File not found");
             }
-        });
+        } else {
+            request->send(400, "text/plain", "Filename not specified");
+        }
+    });
+
+    server.on("/upload", HTTP_GET, [this](AsyncWebServerRequest *request) {
+
+    });
+
+    server.on("/delete", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        if (request->hasParam("filename")) {
+            String filename = request->getParam("filename")->value();
+            if (_fs.deleteFile(filename)) {
+                request->send(200, "text/plain", "File deleted successfully");
+            } else {
+                request->send(404, "text/plain", "File not found");
+            }
+        } else {
+            request->send(400, "text/plain", "Filename not specified");
+        }
+    });
 }

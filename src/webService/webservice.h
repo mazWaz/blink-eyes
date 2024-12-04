@@ -1,10 +1,15 @@
+#ifndef WEBSERVICE_H
+#define WEBSERVICE_H
 #include <ESPAsyncWebServer.h>
 
+#include "storage/s_fs.h"
 #include "webService/html_ui.h"
 
 class WebService {
    private:
+    SFS &_fs;
     AsyncWebServer server;
+
     static const char s_content_enc[];  // Declaration of static const member
     void setStaticContentCacheHeaders(
         AsyncWebServerResponse *response);  // Method to set cache headers
@@ -13,11 +18,12 @@ class WebService {
     void pageRequest();
     void apiRequest();
     void imageRequest();
-    void handleFileUpload(AsyncWebServerRequest *request, String filename,
-                          size_t index, uint8_t *data, size_t len, bool final);
 
    public:
-    WebService();
+    WebService(SFS &fs);
+
     void init();
     void loop();
 };
+
+#endif

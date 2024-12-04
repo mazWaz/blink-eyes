@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 SD Card Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .container {
+            margin: 20px auto;
+            max-width: 800px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+        }
+
+        .btn-danger:hover {
+            background-color: #e53935;
+        }
+
+        .file-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .file-item {
+            background-color: #f4f4f4;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item button {
+            margin-left: 10px;
+        }
+
+        .file-item img {
+            max-height: 100px;
+            margin-right: 20px;
+        }
+
+        .file-item:hover {
+            background-color: #e7e7e7;
+        }
+
+        #error {
+            color: red;
+            text-align: center;
+        }
+
+        #info {
+            color: #555;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>ESP32 SD Card Manager</h1>
+    </header>
+
+    <div class="container">
+        <button class="btn" onclick="loadFiles()">Load Files</button>
+        <h3>Available GIF Files:</h3>
+        <ul id="fileList" class="file-list"></ul>
+
+        <div id="fileInfo" class="info"></div>
+        <div id="error"></div>
+        <div id="info"></div>
+    </div>
+
+    <script>
+        const esp32Ip = "http://4.3.2.1"; // Replace with your ESP32's IP address
+
+        // Function to load the list of GIF files from the SD card
+    async function loadFiles() {
+            const fileList = document.getElementById("fileList");
+            const errorDiv = document.getElementById("error");
+
+            try {
+                const response = await fetch(`${esp32Ip}/list`);
+                const data = await response.text();
+
+                errorDiv.innerHTML = ''; // Clear any previous errors
+                fileList.innerHTML = ''; // Clear current list
+
+                const files = data.split("\n").filter(file => file.endsWith('.gif'));
+
+                if (files.length === 0) {
+                    fileList.innerHTML = "<li>No GIF files found on the SD card.</li>";
+                } else {
+                    const imageElements = [];
+
+                    // Display loading indicator
+
+                    // Create list items with placeholders
+                    files.forEach((file, index) => {
+                        const listItem = document.createElement("li");
+                        listItem.classList.add("file-item");
+                        listItem.innerHTML = `
+                    <div>
+                        <img id="img-${index}" src="placeholder.jpg" alt="Loading GIF..." width="100">
+                        <span>${file}</span>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="viewFile('${file}')">View</button>
+                        <button class="btn btn-danger" onclick="deleteFile('${file}')">Delete</button>
+                    </div>
+                `;
+                        fileList.appendChild(listItem);
+                        imageElements.push(`img-${index}`);
+                    });
+
+                    // Sequentially load images
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const imgElementId = imageElements[i];
+                        const imgElement = document.getElementById(imgElementId);
+
+                        try {
+                            await loadImage(`${esp32Ip}/${file}`);
+                            imgElement.src = `${esp32Ip}/${file}`;
+                        } catch (imgError) {
+                            console.error(`Failed to load image ${file}:`, imgError);
+                            imgElement.src = "error-placeholder.jpg";
+                            imgElement.alt = "Failed to load image.";
+
+                            const errorMsg = document.createElement("li");
+                            errorMsg.classList.add("error-item");
+                            errorMsg.textContent = `Failed to load image: ${file}`;
+                            fileList.appendChild(errorMsg);
+                        }
+                    }
+
+                    // Hide loading indicator after all images are processed
+                }
+            } catch (error) {
+                console.error("Error loading files:", error);
+                errorDiv.innerHTML = "Error loading files.";
+            }
+        }
+
+        function loadImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error(`Failed to load image at ${url}`));
+                img.src = url;
+            });
+        }
+
+// Helper function to load an image and return a Promise
+function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error(`Failed to load image at ${url}`));
+        img.src = url;
+    });
+}
+
+        // Function to view the selected GIF file
+        function viewFile(filename) {
+            const fileInfo = document.getElementById("fileInfo");
+            fileInfo.innerHTML = `<h3>Viewing: ${filename}</h3><img src="${esp32Ip}/image?filename=${filename}" alt="GIF Image" style="max-width: 100%; max-height: 500px;">`;
+        }
+
+        // Function to delete the selected GIF file
+        function deleteFile(filename) {
+            if (confirm(`Are you sure you want to delete the file ${filename}?`)) {
+                fetch(`${esp32Ip}/delete?filename=${filename}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById("info").innerText = data; // Show success or error message
+                        loadFiles(); // Reload the file list after deletion
+                    })
+                    .catch(error => {
+                        document.getElementById("error").innerHTML = "Error deleting the file.";
+                    });
+            }
+        }
+    </script>
+
+</body>
+
+</html>
