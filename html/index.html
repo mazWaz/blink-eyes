@@ -29,24 +29,12 @@
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
         }
-
-        h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin: 10px 0;
-            color: #ffd700;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
         h1 img {
-            width: 100px;
+            width: 100%;
             /* Smaller size */
-            height: 100px;
+            height: 100%;
             /* Smaller size */
-            vertical-align: middle;
-            margin-right: -30px;
+   
         }
 
         h2 {
@@ -170,6 +158,7 @@
 
         ul li {
             margin-bottom: 15px;
+            justify-content: space-between;
             display: flex;
             align-items: center;
             padding: 10px;
@@ -194,20 +183,29 @@
         }
 
         ul li span {
-            color: #ffffff;
-            font-size: 1rem;
+        color: #ffffff;
+        font-size: 1rem;
+        text-align: center; /* Center the text */
         }
+
+        ul li .file-info {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center the image and file name horizontally */
+        }
+
+
         button {
             padding: 10px;
             font-size: 1rem;
         }
-       .button-container {
-    display: flex;
-    justify-content: flex-start; /* Align buttons to the left (you can change this to 'center' or 'flex-end' if needed) */
-    gap: 10px; /* Space between the buttons */
-    align-items: center; /* Vertically center the buttons */
-    width: 100%; /* Ensure the container takes up the full width */
-}
+            .button-container {
+            display: flex;
+            justify-content: flex-start; /* Align buttons to the left (you can change this to 'center' or 'flex-end' if needed) */
+            gap: 10px; /* Space between the buttons */
+            align-items: center; /* Vertically center the buttons */
+            width: 100%; /* Ensure the container takes up the full width */
+        }
 
 #upload-btn {
     padding: 10px 20px;
@@ -283,13 +281,17 @@
                 font-size: 0.9rem;
             }
         }
+        canvas {
+            display: none; /* Hide the canvas */
+        }
     </style>
 </head>
 
 <body>
+    <canvas id="gifCanvas"></canvas>
     <div class="container">
-        <h1><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJMYXllcl8yIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4NDMuODkgNzIwLjU5Ij48ZyBpZD0iTGF5ZXJfMS0yIj48cGF0aCBkPSJNNDMzLjM5LDM5LjcxYzAtMTAuMTUsMC0yMC4zLDAtMzAuNDUsMC03Ljg2LDEuNjgtOS42Miw5LjMzLTkuMiwzOS43OSwyLjE2LDc4Ljk3LDguMjMsMTE3LjUxLDE4LjQ3LDIzLjAyLDYuMTIsNDUuMjQsMTQuMzYsNjcuMjcsMjMuMzgsMTguODIsNy43LDMwLjMyLDIxLjQxLDM3LDM5Ljk5LDcuMTQsMTkuODgsOC44OSw0MC41NCw4LjU3LDYxLjQxLS4zNSwyMy4zNC0zLjQsNDYuNC04LjU0LDY5LjE4LTE2LjYzLDczLjY2LTQ3LjQ4LDE0MC41Mi05NS45LDE5OC43Ny0yNS45NywzMS4yNC01Ni4zOSw1Ny4yNy05Mi45NSw3NS42My0xMS4yOSw1LjY3LTIyLjg1LDEwLjYxLTM0Ljk5LDE0LjEzLTcuMDIsMi4wMy04LjExLjktNy43Ni02LjEuOTItMTguNDEsMS4xMy0zNi44Ni0uMDgtNTUuMjUtLjgtMTIuMTctMS4yLTEyLjA0LDEwLjk4LTEyLjE2LDE3Ljc4LS4xOCwzNS42OCwxLjM3LDUzLjI5LTEuOTcsMzYuNDktNi45NCw2Mi4zOS0yNy43Myw3NS41NC02Mi4zOCwxMC42MS0yNy45Niw3LjYtNTUuNDEtOC4zMS04MS4yNy01LjgzLTkuNDktMTMuMDMtMTcuNTItMjEuMzktMjQuNjktNS42MS00LjgxLTUuNi02LjMzLjExLTExLjE3LDMxLjIyLTI2LjUxLDQzLjc1LTY1LjkzLDMwLjczLTEwMi44My0xMy41Mi0zOC4zMy00MS41MS02MC40MS04MS43OC02Ni4yNS0xNy41MS0yLjU0LTM1LjIzLS44NC01Mi44Ni0uOTctNC41NS0uMDMtNS45OC0xLjE4LTUuODItNS44MS4zNS0xMC4xNC4xMS0yMC4zLjExLTMwLjQ1LS4wMiwwLS4wMywwLS4wNSwwWiIgZmlsbD0iI2Y1ZDAxOSIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTM0MC4wMiw3NS44NWMtMjEuMzEsMC00Mi42MS0uMDItNjMuOTIsMC05LjA5LjAxLTEwLjY5LDEuNi0xMC43MywxMC44Mi0uMDcsMTQuODEtLjA3LDI5LjYyLS4wMyw0NC40NC4wMiw3LjUyLDEuODQsOS44Nyw5LjQ2LDEwLjc0LDI3LjI0LDMuMTIsNDEuNDgsMjQuNzksNDEuMzcsNDguNDYtLjE5LDQxLjExLDAsODIuMjEtLjA0LDEyMy4zMi0uMDMsMjcuMjUtMTcuNDIsNDUuNzgtNDQuNDgsNDguMTItOS4zMi44MS0xOC42Mi4zMy0yNy45Mi42OC0yLjg2LjExLTQuNDYtLjk5LTUuOTMtMy40NS0yNi45My00NS00Ni40MS05Mi45Ni01Ny45LTE0NC4xOC02LjY2LTI5LjctMTAuMzEtNTkuNjQtOC42Mi05MC4wOCwxLjAzLTE4LjU1LDQuMjYtMzYuNjMsMTIuNzgtNTMuNDQsNi41Ny0xMi45NywxNi4zNy0yMi4yLDI5Ljc1LTI4LjE3LDM5Ljc0LTE3LjcyLDgxLjI2LTI5LjA3LDEyNC4wOS0zNi4xNywyMC43LTMuNDMsNDEuNTMtNS41Myw2Mi40NS02LjgzLDguNjMtLjU0LDEwLjA1Ljg0LDEwLjA2LDkuMzguMDMsMjAuNDctLjExLDQwLjk0LjA5LDYxLjQxLjA0LDQtMS4xOCw1LjA2LTUuMDYsNS4wNC0yMS44LS4xNi00My42MS0uMDgtNjUuNDItLjA4WiIgZmlsbD0iI2Y1ZDAxOSIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTQzMy40NywzNjIuNGMtMTMuMTMsMC0yNi4yNy4wMy0zOS40LS4wMi03LjE0LS4wMi05LjA1LTEuODYtOS4wNy04LjcyLS4wNC0xNy42Mi0uMDYtMzUuMjMtLjAzLTUyLjg1LDAtNy4xLDEuODMtOC45MSw4LjgtOC45MSwyNC40NCwwLDQ4Ljg3LS4wNiw3My4zMS4wNyw0LjI5LjAyLDguNjcuMzcsMTIuODMsMS4zMywxNi43NCwzLjgzLDI2LjI5LDE5LjQ5LDIzLjUyLDM4LjMyLS42LDQuMDgtMS4zNCw4LjE1LTMuMDgsMTIuMDEtNS41NSwxMi4zMi0xNC45MiwxOC42OS0yOC40OCwxOC43OC0uMzMsMC0uNjYsMC0xLDAtMTIuNDcsMC0yNC45NCwwLTM3LjQsMFoiIGZpbGw9IiNmNWQwMTkiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik00MzIuNzIsMjExLjA0Yy0xMy40OCwwLTI2Ljk3LjAyLTQwLjQ1LDAtNS4yOC0uMDEtNy4yNS0xLjgzLTcuMjctNy4xNC0uMDctMTguNDctLjA2LTM2Ljk1LjA1LTU1LjQyLjAzLTUuNDcsMi4xLTcuNTcsNy42Ny03LjU5LDI2Ljk3LS4wOCw1My45NC0uMzYsODAuOS4xNCwxNi44MS4zMSwyNy43OCwxMi4zMSwyOS44NiwzMC45NC45Nyw4LjY5LS41NCwxNy00LjY0LDI0LjYzLTUuNTQsMTAuMzItMTUuMDQsMTQuMTYtMjYuMTYsMTQuMzUtMTMuMzEuMjMtMjYuNjMuMDUtMzkuOTUuMDV2LjA0WiIgZmlsbD0iI2Y1ZDAxOSIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTAsNTk4LjVjMC0xMi4zMS0uMDQtMjQuNjIuMDItMzYuOTMuMDMtNS43MSwxLjM1LTcuMDEsNy4xMi03LjAyLDIzLjEzLS4wNCw0Ni4yNS0uMDUsNjkuMzguMDMsNC4xNS4wMSw4LjI2Ljc0LDEyLjIsMi4xOCw0LjgzLDEuNzYsOC41MSw1LDkuNzcsOS45MywyLjU0LDkuOTcsMy44OSwyMC4wNC0zLjExLDI5LjAyLTEuMjMsMS41OC0uODQsMi4yNy4yMiwzLjcxLDcuODcsMTAuNjYsNi40NSwyMi40NCwyLjMzLDMzLjY0LTMuMDksOC40MS0xMS41LDkuOTEtMTkuNjMsOS45OC0xNi4xNC4xMy0zMi4yOC4wNC00OC40MS4wNC03LjQ5LDAtMTQuOTcuMDMtMjIuNDYtLjAxLTYuNDgtLjA0LTcuNDEtMS4wMS03LjQyLTcuNjQtLjAyLTEyLjMxLDAtMjQuNjIsMC0zNi45M1pNNDguNjYsNjIyLjk3czAtLjAxLDAtLjAyYzcuNDksMCwxNC45OC4wNiwyMi40Ny0uMDMsMi43OC0uMDMsNS44Mi4xNCw3LjM1LTMuMDIsMy40LTctLjQyLTEzLjI4LTguMTUtMTMuMzItMTEuOTktLjA1LTIzLjk3LS4wMi0zNS45Ni0uMDItMTIuOCwwLTEyLjcsMC0xMi40LDEyLjgzLjA3LDIuODkuOTMsMy42OCwzLjcxLDMuNjIsNy42NS0uMTYsMTUuMzEtLjA2LDIyLjk3LS4wNlpNNDguMjksNTg5Ljc2di4wMmM3LjgsMCwxNS42LjEzLDIzLjQtLjA0LDYuMDUtLjEzLDcuMzUtMS42Myw3LjI2LTcuNDctLjA5LTUuOTQtMS42NS03LjQ3LTguNDQtNy41My0xMi40NS0uMTEtMjQuOS0uMDMtMzcuMzUtLjA0LTExLjksMC0xMS43OS0uMDEtMTEuMzUsMTEuODYuMSwyLjc5LDEuMTYsMy4yOCwzLjU4LDMuMjQsNy42NC0uMTEsMTUuMjctLjA0LDIyLjkxLS4wNFoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0yNjYuMzQsNTc2LjQ3Yy0xLjM1LDIuNjUtLjkyLDQuNjQtLjkyLDYuNTctLjAyLDE3LjgsMCwzNS42LDAsNTMuNCwwLDUuNy0uOTEsNi42LTYuNjksNi42My0zLjMzLjAyLTYuNjYtLjA0LTkuOTgtLjAzLTMuMjgsMC00Ljg5LTEuNTMtNC44OC00Ljg3LjA1LTI0LjEyLS4wNS00OC4yNC4xOS03Mi4zNi4wNy03LjI5LDQuMDMtMTAuODEsMTEuMjktMTEuMjYuNS0uMDMsMSwwLDEuNSwwLDIxLjkxLS4wNywxOC44Ni0xLjEyLDMxLjY0LDE1LjY0LDEyLjI5LDE2LjEzLDI0LjU5LDMyLjI1LDM2Ljg5LDQ4LjM3LjU4Ljc2LDEuMjcsMS40NCwxLjk1LDIuMjIsMS44Mi0xLjQxLjkzLTMuMi45NC00LjY5LjA3LTE4LjEzLjAxLTM2LjI3LjA0LTU0LjQsMC02LjE4LDEuMDItNy4xMyw3LjMzLTcuMTMsMTUuODUsMCwxNC4yNC0xLjQsMTQuMjUsMTQuMDkuMDIsMjAuMTMuMDIsNDAuMjYtLjAyLDYwLjM5LS4wMiwxMC41OC0zLjU3LDEzLjMzLTE0LjEsMTQuMjctMTIuODgsMS4xNS0yMS43NS0yLjk0LTI5LjMxLTEzLjk1LTEyLjM4LTE4LjA0LTI2LjQtMzQuOTUtNDAuMTMtNTIuODZaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNODI0LjM3LDYxMy44OWM1LjgxLDcuMjEsMTEuMzMsMTQuMDMsMTYuODEsMjAuODgsMS40MiwxLjc3LDMuNDgsMy40MSwyLjQzLDYuMDktMS4xNCwyLjkxLTMuODMsMi4xMy02LjA1LDIuMTctMTUuOTcuMjktMTYuNzguNzktMjUuMzctMTIuNjgtNy4xNC0xMS4xOC0xNS41NC0xNi41My0yOC44Mi0xNC4yNi00LjY5LjgtOS42NS40My0xNC40NS4wNC0zLjk5LS4zMi00LjczLDEuMjctNC41NSw0Ljc5LjI3LDUuNDgtLjAxLDEwLjk4LjA5LDE2LjQ3LjA3LDQtMS42OSw1LjgxLTUuNzEsNS42OC0zLjgyLS4xMy03LjY1LS4wNi0xMS40OC0uMDYtMy4zLDAtNC44Mi0xLjYyLTQuODItNC45NC4wMy0yNS45Ni4wMi01MS45MSwwLTc3Ljg3LDAtMy40LDEuNjMtNS42MSw1LTUuNTcsMjQuNjEuMjUsNDkuMjUtMS4zMiw3My44MS44MSwxMC41My45MiwxNi45NCw3LjQsMTguNzgsMTcuNzEsMS4zOCw3LjczLDEuMjcsMTUuNi4wNSwyMy4zNi0xLjM5LDguODQtNi44OCwxNC40LTE1LjcxLDE3LjM3Wk03ODkuMDEsNTc0LjU2Yy02Ljk4LDAtMTMuOTUuMS0yMC45My0uMDUtMi43OS0uMDYtMy44My44LTMuNzIsMy42OC4yLDUuMzEuMiwxMC42MywwLDE1Ljk0LS4xMSwyLjk4Ljc2LDQuMTIsMy45LDQuMDEsNi4zLS4yMiwxMi42Mi0uMDYsMTguOTMtLjA3LDcuNDcsMCwxNC45NS4xOSwyMi40Mi0uMDgsNy4wNy0uMjYsOS4wMi0yLjQ4LDkuMzEtOS40OC4wNS0xLjE2LjA1LTIuMzIuMDMtMy40OS0uMTUtNy45NS0yLjQ4LTEwLjMyLTEwLjUyLTEwLjQ1LTYuNDgtLjEtMTIuOTUtLjAyLTE5LjQzLS4wMVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik00MTAuNTEsNDY1LjI1YzAsMTAuNjUuMDEsMjEuMywwLDMxLjk1LDAsNi4xMS0uMDUsNi4xOC02LjA5LDQuMzItMzcuNjEtMTEuNTctNjkuOTctMzIuMDItOTguNzgtNTguNDQtNC40MS00LjA0LTguNjItOC4zLTEyLjg4LTEyLjUxLS42NC0uNjQtMS44NS0xLjI0LTEuMzYtMi4zOC41LTEuMTYsMS43Ny0uNiwyLjY4LS42MSw5LjY1LS4wNSwxOS4zMS0uMDUsMjguOTYtLjA1LDI3LjQ2LDAsNTQuOTMuMDksODIuMzktLjA5LDQuMjItLjAzLDUuMywxLjI3LDUuMTksNS4zNi0uMjgsMTAuODEtLjEsMjEuNjMtLjEsMzIuNDVoLS4wMloiIGZpbGw9IiNmNWQwMTkiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik03MjMuNDMsNjQzLjA1Yy03LjI5LDIuMjItMTIuMTItMS44OS0xNC43Mi05LjQyLTIuMjItNi40MS02LjM0LTguMjgtMTMuMTQtNy45Ny0xMy45NS42My0yNy45NC4yOC00MS45MS4wOS0zLjI5LS4wNS00Ljg2LDEuMDgtNi40OCwzLjk0LTkuMTQsMTYuMTItMy4yMSwxMy4wNS0yMS45OCwxMy4zOC0xLC4wMi0yLC4wNC0yLjk5LS4wMi00LjUzLS4yNi01LjY4LTIuMDgtMy41My02LjA5LDYuMTMtMTEuNCwxMi4zOC0yMi43MywxOC41OC0zNC4xLDYuNi0xMi4xLDEzLjMyLTI0LjEzLDE5Ljc2LTM2LjMxLDYuNDQtMTIuMiwxMi4xLTEzLjg0LDI4LTExLjA1LDQuOTUuODcsNy42Nyw0Ljk4LDkuOTcsOS4xNSwxMy4wNywyMy42OSwyNi4xNCw0Ny4zOCwzOS4xNyw3MS4wOSwzLjExLDUuNjYsMi4wNyw3LjI3LTQuNTQsNy4zMi0xLjY2LjAxLTMuMzMsMC02LjE4LDBaTTY5NC44Miw2MDguMTZjLTYuMTYtMTEuMzEtMTEuOTEtMjEuODUtMTguMTQtMzMuMjgtNi4xNCwxMS41MS0xMS44NCwyMi4xOS0xNy43NSwzMy4yOGgzNS44OVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik01NzguNTYsNjQyLjc1Yy0xMC4zMSwwLTIwLjY3LjU5LTMwLjk0LS4xMy0xOC45Ni0xLjMzLTI3LjAzLTkuOTEtMjguMDMtMjguODItLjU3LTEwLjgtLjU0LTIxLjYzLjE0LTMyLjQzLjk2LTE1LjIsOS40OS0yNC4xLDI0LjU1LTI2LjAxLDQuNjMtLjU5LDkuMjUtLjg5LDEzLjkzLS44NywxNi4zMS4wNywzMi42MiwwLDQ4Ljk0LjA0LDYuMTkuMDEsNy4xNywxLjA1LDcuMiw3LjI5LjA4LDE1LjY3LjU2LDEzLjQzLTEzLjMxLDEzLjUxLTE0Ljk4LjA5LTI5Ljk2LS4wMy00NC45NC4wNS0xMS44Ny4wNi0xNC42MywyLjgzLTE0Ljc0LDE0LjgxLS4wNyw3LjE1LS4xOCwxNC4zMi4yNiwyMS40NS40OSw3Ljg4LDMuNSwxMC41MywxMS40NiwxMC41OCwxNy4zMS4xMSwzNC42Mi4wNSw1MS45My4wNSw4LjkxLDAsOS4yOC4zNiw5LjM1LDkuMjJxLjA5LDExLjU2LTExLjM0LDExLjU5Yy04LjE2LjAxLTE2LjMxLDAtMjQuNDcsMCwwLS4xMSwwLS4yMiwwLS4zM1oiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0zODQuNzIsNjI0LjM5YzAsNC40OS0uMDUsOC45OC4wMiwxMy40Ny4wNiwzLjUyLTEuNTQsNS4yNC01LjA5LDUuMi0zLjk5LS4wNS03Ljk4LS4wMy0xMS45OC0uMDEtMy4yOS4wMS00Ljg2LTEuNTUtNC44Ni00Ljg4LjAyLTI2LjExLjAyLTUyLjIyLS4wMi03OC4zMywwLTMuODUsMS45My01LjM3LDUuNTctNS4zMSwzLjQ5LjA1LDYuOTkuMTMsMTAuNDgtLjAzLDQuMzItLjE5LDUuOTksMS45MSw1Ljk1LDYuMDItLjA4LDguNDguMDcsMTYuOTctLjEyLDI1LjQ0LS4wNiwyLjc2LjYyLDMuODksMy41MywzLjYyLDIuNjQtLjI0LDUuMzgtLjQxLDcuOTcsMCw5LjUsMS41NSwxNS42Mi0yLjY4LDIwLjU4LTEwLjQ2LDQuNjMtNy4yNiwxMC4yOC0xMy44NywxNS4zMy0yMC44OCwxLjk0LTIuNjksNC4yMi0zLjk0LDcuNTYtMy43NiwzLjk4LjIxLDcuOTguMDYsMTEuOTcuMDQsMS44NywwLDMuNywwLDQuNzEsMi4wMSwxLjAxLDIuMDEtLjA0LDMuNTEtMS4xOCw0Ljk5LTguNTUsMTEuMDMtMTcsMjIuMTQtMjUuNzYsMzMtMi4wNSwyLjU0LTEuODYsMy41NC4zMyw1LjkxLDEwLjU3LDExLjUxLDE5LjY4LDI0LjIzLDI5LjMzLDM2LjUxLDIuNDEsMy4wNy44NCw1LjkyLTMuMDUsNi4wNS01LjE1LjE3LTEwLjMxLS4wNC0xNS40Ni4wNC0yLjc3LjA1LTQuMTQtMS44MS01LjU3LTMuNjUtNi44My04Ljc5LTEzLjc0LTE3LjUyLTIwLjQtMjYuNDQtMi45NS0zLjk1LTYuNTUtNS44Ny0xMS40My01Ljc4LTQuODIuMS05LjY2LjE5LTE0LjQ3LS4wNy0zLS4xNi00LjE3LjYxLTMuOTgsMy44MS4yNyw0LjQ3LjA3LDguOTguMDcsMTMuNDdoLS4wNFoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0xNjYuNjIsNjQzLjA4Yy04LjI4LS4yMy0xOC4yOS41OS0yOC4yNC0uNTEtMTcuNTktMS45NC0yNS44OC05LjkyLTI2LjY2LTI3LjYtLjgxLTE4LjQ0LS4zLTM2LjkzLS4zNC01NS40LDAtMy41NiwxLjk4LTUuMDYsNS4zOS01LjA0LDMuNDkuMDIsNywuMTMsMTAuNDgtLjA0LDQuNTktLjIzLDYuMTQsMS45Myw2LjEsNi4zMi0uMTQsMTMuOTgtLjA2LDI3Ljk1LS4wNiw0MS45MywwLDIuMTYsMCw0LjMzLjA4LDYuNDkuMzQsMTAuMDgsMy4zLDEyLjk5LDEzLjM5LDEzLjAyLDE1LjgxLjA1LDMxLjYyLDAsNDcuNDMuMDQsNi4zNy4wMSw3LjIuODMsNy4yMiw3LjE2LjA2LDE1LjQ3LDEuMjIsMTMuNTMtMTMuNjEsMTMuNjItNi40OS4wNC0xMi45OCwwLTIxLjE3LDBaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNMjA5LjA0LDU5OC44NGMwLTEyLjQ3LS4wMS0yNC45NSwwLTM3LjQyLDAtNS45Ni45Mi02Ljg0LDcuMDEtNi44NywzLjE2LS4wMiw2LjMyLjA0LDkuNDgsMCwzLjctLjA2LDUuNTMsMS42NCw1LjUzLDUuNC0uMDMsMjUuOTUtLjA0LDUxLjksMCw3Ny44NCwwLDMuNTQtMS41Niw1LjI2LTUuMDUsNS4yOC0zLjgzLjAyLTcuNjUtLjA1LTExLjQ4LjAzLTQuMDYuMDktNS41Ni0xLjgzLTUuNTEtNS44Mi4xMy0xMi44MS4wNS0yNS42MS4wNS0zOC40MmgtLjAzWiIgZmlsbD0iI2Y2ZjVmNCIgc3Ryb2tlLXdpZHRoPSIwIi8+PHBhdGggZD0iTTI4MC4wOCw3MjAuMzdjLTQuNS4wMS04Ljk5LS4xNC0xMy4zNC0xLjQyLTIuMzktLjcxLTQuODUtMS40Ni02LjQzLTMuNTUtMS41Ny0yLjA4LTMuOTQtNS40LTEuNzUtNi44LDEuOTctMS4yNiw2LjMzLTIuNDksOC43MSwxLjM1LDEuMDQsMS42OCwyLjc1LDIuMzIsNC42MSwyLjY1LDUuNjEsMS4wMiwxMS4yNi43OSwxNi44Ny4yNCwxLjkxLS4xOSw0LjIxLS44Miw0LjIxLTMuNDEsMC0yLjY5LTIuMjgtMi45LTQuMjctMy4yMS02Ljg5LTEuMDktMTMuOTctLjMzLTIwLjc5LTItMy43Ni0uOTItNy40OS0yLjE1LTguNzItNi40Ny0xLjUtNS4yNS42Ny05Ljc1LDYuMS0xMS4zNiw5LjA5LTIuNzEsMTguMzMtMi42MiwyNy40OS0uMDYsMi4xLjU5LDMuOTEsMS44LDUuNDIsMy40MiwxLjY4LDEuOCwzLjMxLDQuODEsMS43OCw2LjA5LTIuMDgsMS43NC01Ljc1LDEuNzYtOC4yNC0uMjEtNC40LTMuNDYtMTcuMjMtNS40Mi0yMS45OC0zLjAxLTEuMTEuNTctMS45MywxLjMtMS44MywyLjY3LjE0LDEuODksMS42MywyLjUyLDMuMDgsMi43LDMuOTUuNDksNy45My44NywxMS45LDEuMDgsNC4xNi4yMSw4LjI5LjU2LDEyLjMyLDEuNjcsMy44MiwxLjA2LDYuNTMsMy4xNyw2Ljg0LDcuNDkuMzIsNC40My0xLjI2LDcuNzMtNS4zOCw5LjcyLTMuMzUsMS42My04LjQxLDIuNDQtMTYuNjIsMi40M1oiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik00NDAuMTEsNzAyLjM5YzAtNC42NS4xMS05LjMxLS4wNC0xMy45NS0uMDgtMi41OC43OC0zLjQ0LDMuNDEtMy4zOCw3LjguMTcsMTUuNjItLjA2LDIzLjQyLjEzLDguOTcuMjIsMTUuMDksNi42MSwxNS43LDE2LjA0LjYxLDkuMzMtNC43NCwxNy4zNS0xMy4zNSwxOC4xNS04LjkuODMtMTcuOTIuMzItMjYuODguNDQtMi4yMS4wMy0yLjI4LTEuNC0yLjI3LTIuOTkuMDEtNC44MiwwLTkuNjMsMC0xNC40NVpNNDQ5LjM5LDcwMi4yN3EuMDgsOS45NywxMC4xMyw5Ljk3YzEuNDksMCwyLjk5LjAzLDQuNDgsMCw2LjY0LS4xOCw5LjY2LTMuMzIsOS42MS05Ljk1LS4wNS02LjQxLTIuOS05LjIyLTkuNTEtOS4zNS0xLjgyLS4wNC0zLjY1LDAtNS40NywwcS05LjMsMC05LjIzLDkuMzRaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNNTQ5LjMxLDcyMC41OWMtMi42NC0uMzEtNS4zMi0uNDItNy45LS45OC0xMC4yNC0yLjE5LTE0LjI2LTcuODktMTMuNzQtMTkuMjMuNC04Ljc1LDUuNzYtMTMuOTQsMTUuMzMtMTUuMzUsNC42OS0uNjksOS4yNi0uNTUsMTMuODkuMTUsOC44NiwxLjM0LDE0LDcuMDksMTQuNDUsMTYuMy40Niw5LjM2LTMuOTMsMTUuNTYtMTIuNiwxNy44LTMuMDguNzktNi4yMiwxLjE1LTkuNDIsMS4zWk01NDguNjcsNjkyLjE2Yy0uNDYuMDItMS42My0uMDEtMi43OC4xNC02LjM1Ljg1LTkuMjEsMy43OC05LjM3LDkuNTUtLjE5LDYuNTIsMi40NSw5Ljc4LDkuMDksMTAuOCwyLjI3LjM1LDQuNjcuNCw2Ljk0LjEsNy43OS0xLjA1LDExLjE2LTYuMjEsOS4yMy0xMy44NC0xLjE5LTQuNzMtNC45LTYuNzUtMTMuMTEtNi43NVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0zNzcuOTUsNjk2LjQ4YzAtMi4xNi4yOC00LjM3LS4wNi02LjQ4LS43My00LjUxLDEuNDMtNS4xNCw1LjI4LTUuMDIsMy4wNy4xLDQuMDMuOTUsMy44NSw0LjAxLS4yNiw0LjQ4LS4xMyw4Ljk4LS4wNCwxMy40Ny4xMiw2LjA1LDIuMzYsOC42Nyw4LjMxLDEwLjAxLDIuOC42Myw1LjU5LjY2LDguNDEuMTQsNi40Ny0xLjIxLDguODctMy45Miw4Ljk5LTEwLjQ0LjA5LTQuNjYuMjItOS4zMy0uMDUtMTMuOTctLjI0LTQuMDUsMi41LTMuMDYsNC42LTMuMDcsMi4xMi0uMDEsNC44OC0uOTQsNC41NywzLjExLS40OCw2LjI4LjQ5LDEyLjYxLS42MSwxOC44OS0xLjIyLDYuOTQtNS41LDEwLjcxLTEyLjEsMTIuMjQtNS43NSwxLjMzLTExLjU1LDEuNDItMTcuMzMuMjctOS4yOS0xLjg1LTEzLjY2LTcuMTctMTMuODEtMTYuNjgtLjAzLTIuMTYsMC00LjMyLDAtNi40OVoiIGZpbGw9IiNmNmY1ZjQiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0zMzguNzYsNjg1LjExYzUuOTgsMCwxMS45Ny4xNCwxNy45NC0uMDYsMi44Ni0uMDksMy4zNiwxLjIsMy4xOCwzLjU4LS4xNiwyLjA2LjYzLDQuNjUtMi45Nyw0LjMtLjMzLS4wMy0uNjctLjAzLTEsMC00LjIzLjM1LTEwLjA0LTEuOTMtMTIuMjkuOTYtMi4xMSwyLjcxLS42Miw4LjI1LS42NywxMi41NC0uMDQsMi42NiwwLDUuMzItLjAxLDcuOTcsMCw1LjM2LTEuOTcsNi43NC03LjI0LDUuNDUtMi4yMy0uNTQtMS43OC0yLjA2LTEuNzktMy40NS0uMDQtNi42NS0uMTctMTMuMy4wNS0xOS45My4wOS0yLjg4LS44Mi0zLjc5LTMuNjMtMy42MS0zLjMxLjIxLTYuNjUtLjEtOS45Ni4xMS0zLjE3LjItMy40Mi0xLjQ1LTMuMzgtMy45Ny4wNS0yLjQxLjAzLTQuMDksMy4zMi0zLjk1LDYuMTQuMjUsMTIuMjkuMDcsMTguNDQuMDdaIiBmaWxsPSIjZjZmNWY0IiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNNTA5LjcsNzAyLjZjMCw0LjMyLS4yNCw4LjY2LjA3LDEyLjk2LjI3LDMuNjctMS4xNiw0LjQ1LTQuNTQsNC4zNi0zLjEtLjA4LTQuODItLjI1LTQuNjgtNC4xOS4zMi04Ljk2LjMyLTE3Ljk1LS4wMi0yNi45Mi0uMTUtMy45OCwxLjk0LTMuOCw0LjU3LTMuNjksMi4zOC4xLDUuMDktLjc4LDQuNywzLjUzLS40Miw0LjYyLS4wOSw5LjMtLjA5LDEzLjk1WiIgZmlsbD0iI2Y2ZjVmNCIgc3Ryb2tlLXdpZHRoPSIwIi8+PC9nPjwvc3ZnPg=="
-                alt="Logo"> link Eyes</h1>
+        <h1><img src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MzAuNTMgMzI4Ljc0Ij48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2ZmY2YwMDt9LmNscy0ye2ZpbGw6I2ZmZjt9LmNscy0ze2ZpbGw6I2ZkZWViYjt9LmNscy00e2ZpbGw6I2Y2ZDIxNTt9PC9zdHlsZT48L2RlZnM+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzEtMiIgZGF0YS1uYW1lPSJMYXllciAxIj48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik01OS4yNCwyMDMuMDVjMTMuNTEsMCwxOC42LDUuMjgsMTguNiwxNi4xNXY0LjdjMCw1LjQ5LTIuMTUsOS43LTYuMTcsMTIuNDQsNC41MSwyLjY0LDYuNjYsNi44NSw2LjY2LDEyLjYzdjUuNjhDNzguMzMsMjY1LDc0LDI3MS41OSw2MSwyNzEuNTlIMi45NEEyLjYsMi42LDAsMCwxLDAsMjY4LjY1VjIwNmEyLjYsMi42LDAsMCwxLDIuOTQtMi45M1pNNTUsMjMxLjU0YzYuNTYsMCw4LjQyLTIsOC40Mi01Ljc4di0zLjMzYzAtNC0yLjE2LTUuODctNy4yNS01Ljg3aC00MGMtLjg5LDAtMS4yOC4zOS0xLjI4LDEuMjd2MTMuNzFaTTE0Ljg4LDI1Ni44YzAsLjg4LjM5LDEuMjgsMS4yOCwxLjI4SDU2LjNjNS4xOSwwLDcuMjUtMS44Niw3LjI1LTZ2LTMuNzJjMC00LTItNi4xNy04LjUyLTYuMTdIMTQuODhaIi8+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTAyLjUxLDIwMy4wNWExLjg4LDEuODgsMCwwLDEsMi4xNiwyLjE1djM5LjA3YzAsMTAuMzgsMi45NCwxMy40MSwxMywxMy40MWgzOS42NmExLjg4LDEuODgsMCwwLDEsMi4xNSwyLjE2djkuNTlhMS44OCwxLjg4LDAsMCwxLTIuMTUsMi4xNkgxMTcuMWMtMTkuNzgsMC0yNy4zMS03LTI3LjMxLTI1Ljg1VjIwNS4yYTEuODcsMS44NywwLDAsMSwyLjE1LTIuMTVaIi8+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTgxLjE0LDIwMy4wNWExLjg3LDEuODcsMCwwLDEsMi4xNSwyLjE1djY0LjIzYTEuODgsMS44OCwwLDAsMS0yLjE1LDIuMTZIMTcwLjU2YTEuODgsMS44OCwwLDAsMS0yLjE1LTIuMTZWMjA1LjJhMS44NywxLjg3LDAsMCwxLDIuMTUtMi4xNVoiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yMTMuNzQsMjAzLjA1YzcsMCw4LjUyLDEuMTcsMTEuMzYsNS43N2wzNi40Myw0Ny43OWExLjMxLDEuMzEsMCwwLDAsMS4yNy42OGguODhjLjQ5LDAsLjc4LS4yOS43OC0xVjIwNS4yYTEuODgsMS44OCwwLDAsMSwyLjE2LTIuMTVIMjc2LjlhMS44NywxLjg3LDAsMCwxLDIuMTUsMi4xNXY1Ni4yMWMwLDcuOTMtMi44NCwxMC4xOC04LjgxLDEwLjE4aC04LjQyYy03LDAtOC41Mi0xLjE4LTExLjM2LTUuNzhMMjEzLjk0LDIxOGExLjQzLDEuNDMsMCwwLDAtMS4yNy0uNjloLS44OWMtLjU4LDAtLjc4LjMtLjc4LDF2NTEuMTFhMS44OCwxLjg4LDAsMCwxLTIuMTUsMi4xNkgxOTguNTdhMS44OSwxLjg5LDAsMCwxLTIuMTYtMi4xNnYtNTYuMmMwLTcuOTMsMi43NC0xMC4xOCw4LjcyLTEwLjE4WiIvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTMwNC45LDIwMy4wNWExLjg3LDEuODcsMCwwLDEsMi4xNSwyLjE1djI2LjA1aDEzLjgxYzYuMTcsMCw4LS42OSwxMC44Ny00LjQxbDE2Ljg0LTIyLjUyYy42OC0uODgsMS4wOC0xLjI3LDIuODQtMS4yN2gxMi4xNGExLjQyLDEuNDIsMCwwLDEsMS4yNywyLjM1bC0xOSwyNC41N2EzMy4zMiwzMy4zMiwwLDAsMS01Ljg4LDYuNTYsMjcuODEsMjcuODEsMCwwLDEsNy40NCw3LjA1TDM2Ny40NywyNjljLjQ5LjY5LjY4LDIuNTUtMS4yOCwyLjU1SDM1My42NmEyLjc5LDIuNzksMCwwLDEtMi43NC0xLjI3TDMzMi45LDI0N2MtMi42NC0zLjQzLTQuNzktNC40LTExLTQuNEgzMDcuMDV2MjYuODJhMS44OCwxLjg4LDAsMCwxLTIuMTUsMi4xNkgyOTQuMzJhMS44OCwxLjg4LDAsMCwxLTIuMTUtMi4xNlYyMDUuMmExLjg4LDEuODgsMCwwLDEsMi4xNS0yLjE1WiIvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTQ3OC4yMSwyMDMuMDVjMS40NiwwLDIuMjUuNjgsMi4yNSwyLjE1djkuM2MwLDEuNDctLjc5LDIuMTYtMi4yNSwyLjE2SDQzNS40MmMtMTAuMTksMC0xMywzLTEzLDEzLjMxdjFoNTUuMzJhMS44OSwxLjg5LDAsMCwxLDIuMTYsMi4xNnY3LjczYTEuODksMS44OSwwLDAsMS0yLjE2LDIuMTZINDIyLjM5djEuNjZjMCwxMC4yOCwyLjg0LDEzLjMyLDEzLDEzLjMyaDQyLjc5YzEuNDYsMCwyLjI1LjY4LDIuMjUsMi4xNXY5LjNjMCwxLjQ3LS43OSwyLjE2LTIuMjUsMi4xNkg0MzUuMTJjLTE5Ljc4LDAtMjcuMzItNy0yNy4zMi0yNS44NVYyMjguOWMwLTE4LjgsNy41NC0yNS44NSwyNy4zMi0yNS44NVoiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik01MDAuNzIsMjAzLjA1YTIuMzcsMi4zNywwLDAsMSwyLjM1LDEuMTdsMjYuMjQsMzUuMzUsMjYuMjUtMzUuMzVhMi4zNywyLjM3LDAsMCwxLDIuMzUtMS4xN2gxMi44MmExLjE1LDEuMTUsMCwwLDEsLjg4LDJsLTM1LjE1LDQ1LjYydjE4LjhhMS44OCwxLjg4LDAsMCwxLTIuMTUsMi4xNkg1MjMuNzNhMS44OCwxLjg4LDAsMCwxLTIuMTUtMi4xNnYtMTguOEw0ODYuNzIsMjA1Yy0uNjgtLjg5LS4yOS0yLC44OC0yWiIvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTY0NC4yNywyMDMuMDVjMS40NiwwLDIuMjUuNjgsMi4yNSwyLjE1djkuM2MwLDEuNDctLjc5LDIuMTYtMi4yNSwyLjE2SDYwMS40OGMtMTAuMTksMC0xMywzLTEzLDEzLjMxdjFoNTUuMzNhMS44OCwxLjg4LDAsMCwxLDIuMTUsMi4xNnY3LjczYTEuODgsMS44OCwwLDAsMS0yLjE1LDIuMTZINTg4LjQ1djEuNjZjMCwxMC4yOCwyLjg0LDEzLjMyLDEzLDEzLjMyaDQyLjc5YzEuNDYsMCwyLjI1LjY4LDIuMjUsMi4xNXY5LjNjMCwxLjQ3LS43OSwyLjE2LTIuMjUsMi4xNkg2MDEuMThjLTE5Ljc4LDAtMjcuMzItNy0yNy4zMi0yNS44NVYyMjguOWMwLTE4LjgsNy41NC0yNS44NSwyNy4zMi0yNS44NVoiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03MjUuODMsMjAzLjA1QTEuODgsMS44OCwwLDAsMSw3MjgsMjA1LjJ2OS4zYTEuODgsMS44OCwwLDAsMS0yLjE1LDIuMTZINjc2Ljc3Yy0zLjcyLDAtNS4xOSwyLjA1LTUuMTksNS40OHYzLjMzYzAsMy42MiwxLjY3LDUuNDgsNS4wOSw1LjQ4aDM2LjcyYzExLjI2LDAsMTcuMTQsNi4wNywxNy4xNCwxNi44NHY3Ljg0YzAsOS41LTUuNDksMTYtMTcuMzQsMTZINjU5YTEuODksMS44OSwwLDAsMS0yLjE2LTIuMTZ2LTkuM0ExLjg4LDEuODgsMCwwLDEsNjU5LDI1OGg1MS40YzMuNzMsMCw1LjE5LTIuMDYsNS4xOS01LjQ5di00YzAtMy43Mi0xLjU2LTUuNDgtNS4wOS01LjQ4SDY3My43M2MtMTEuMjYsMC0xNy02LjA3LTE3LTE2Ljg0VjIxOWMwLTkuNSw1LjM4LTE2LDE3LjIzLTE2WiIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE4My44NCwyODkuM2ExLjA4LDEuMDgsMCwwLDEsMS4yNCwxLjI0djUuNTJhMS4wOCwxLjA4LDAsMCwxLTEuMjQsMS4yNEgxNTguNzdjLTUuODEsMC03LjUsMS43NS03LjUsNy43MnY4YzAsNiwxLjY5LDcuNzIsNy41LDcuNzJoMjUuMDdhMS4wOCwxLjA4LDAsMCwxLDEuMjQsMS4yNHY1LjUyYTEuMDgsMS4wOCwwLDAsMS0xLjI0LDEuMjRIMTU4LjQzYy0xMS4zOCwwLTE1LjcyLTQuMDUtMTUuNzItMTQuODd2LTkuN2MwLTEwLjgyLDQuMzQtMTQuODcsMTUuNzItMTQuODdaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjE2LjEzLDI4OS4zYzIuODgsMCw0LjY4Ljc5LDYuNDgsNC4yMmwxOC42NSwzMy44N2MuNC43OS4yMywxLjM1LS42NywxLjM1aC03LjE2YTEuMjcsMS4yNywwLDAsMS0xLjI5LS43M2wtMy45NS03LjI3SDIwMS42NUwxOTcuNzYsMzI4YTEuMjcsMS4yNywwLDAsMS0xLjI5LjczaC03LjMzYy0xLDAtMS4xMy0uNTYtLjY4LTEuMzVsMTguNDMtMzMuODdjMS44LTMuNDMsMy41NS00LjIyLDUuOTItNC4yMlptOC41MSwyNC45LTktMTYuNTZhLjY3LjY3LDAsMCwwLS42Mi0uNGgtLjM0YS42Ny42NywwLDAsMC0uNjIuNGwtOC45MSwxNi41NloiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0yNzgsMjg5LjNjOC42MywwLDEyLjEyLDQsMTIuMTIsMTEuNjF2My4yNmMwLDYuMzctMi40MiwxMC4xNS04LjM0LDExLjIybDkuNTgsMTEuOTRhLjg2Ljg2LDAsMCwxLS43MywxLjQxaC03LjI3Yy0xLDAtMS4yNC0uMjItMS41OC0uNjdsLTguOS0xMS43OGgtMTguMlYzMjcuNWExLjA4LDEuMDgsMCwwLDEtMS4yNCwxLjI0aC02LjA5YTEuMDgsMS4wOCwwLDAsMS0xLjI0LTEuMjRWMjkxYTEuNDksMS40OSwwLDAsMSwxLjY5LTEuNjlabS0xLjY5LDIwLjE3YzMuNzgsMCw1LjE5LTEuNjksNS4xOS01VjMwMmMwLTMuMzgtMS40MS01LTUuMTktNWgtMjAuOWMtLjUxLDAtLjczLjIyLS43My42N3YxMS43OFoiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0zNTUuMDksMjg5LjNhMS4wOCwxLjA4LDAsMCwxLDEuMjQsMS4yNHY1LjM1YTEuMDgsMS4wOCwwLDAsMS0xLjI0LDEuMjRIMzI2Ljg2Yy0yLjE0LDAtMywxLjE4LTMsMy4xNnYxLjkxYzAsMi4wOSwxLDMuMTYsMi45MywzLjE2aDIxLjE0YzYuNDgsMCw5Ljg2LDMuNDksOS44Niw5LjY5djQuNTFjMCw1LjQ2LTMuMTYsOS4xOC0xMCw5LjE4SDMxNi42YTEuMDgsMS4wOCwwLDAsMS0xLjI0LTEuMjR2LTUuMzVhMS4wOCwxLjA4LDAsMCwxLDEuMjQtMS4yNGgyOS41OWMyLjE0LDAsMy0xLjE4LDMtMy4xNnYtMi4zMWMwLTIuMTQtLjktMy4xNS0yLjkzLTMuMTVIMzI1LjExYy02LjQ4LDAtOS44LTMuNS05LjgtOS42OXYtNC4xMmMwLTUuNDYsMy4xLTkuMTgsOS45Mi05LjE4WiIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTQwNy4xLDI4OS4zYy44NSwwLDEuMy4zOSwxLjMsMS4yNHY1LjUyYzAsLjg0LS40NSwxLjI0LTEuMywxLjI0SDM4OS40MXYzMC4yYTEuMDgsMS4wOCwwLDAsMS0xLjI0LDEuMjRIMzgyYTEuMDgsMS4wOCwwLDAsMS0xLjI0LTEuMjRWMjk3LjNoLTE3LjdjLS44NCwwLTEuMjktLjQtMS4yOS0xLjI0di01LjUyYzAtLjg1LjQ1LTEuMjQsMS4yOS0xLjI0WiIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTQyMS4yNCwyODkuM2ExLjA4LDEuMDgsMCwwLDEsMS4yNCwxLjI0VjMxM2MwLDYsMS42OSw3LjcyLDcuNSw3LjcyaDE1LjYxYzUuOCwwLDcuNDQtMS43NSw3LjQ0LTcuNzJWMjkwLjU0YTEuMSwxLjEsMCwwLDEsMS4yNC0xLjI0aDYuMTRhMS4wOCwxLjA4LDAsMCwxLDEuMjQsMS4yNHYyMy4zM2MwLDEwLjgyLTQuMzQsMTQuODctMTUuNzgsMTQuODdINDI5LjY0Yy0xMS4zOCwwLTE1LjcyLTQuMDUtMTUuNzItMTQuODdWMjkwLjU0YTEuMDgsMS4wOCwwLDAsMSwxLjI0LTEuMjRaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNDk3LjA5LDI4OS4zYzEyLjIzLDAsMTcuMjQsNC45LDE3LjI0LDE1Ljg5djcuNjZjMCwxMS01LDE1Ljg5LTE3LjI0LDE1Ljg5SDQ3MC43OGExLjUsMS41LDAsMCwxLTEuNy0xLjY5VjI5MWExLjUsMS41LDAsMCwxLDEuNy0xLjY5Wm0tMTkuNDQsMzAuODhhLjY0LjY0LDAsMCwwLC43My43M2gxOC40OWM2LjY1LDAsOC44NC0yLjE0LDguODQtOC43OXYtNi4yYzAtNi42NS0yLjE5LTguNzktOC44NC04Ljc5SDQ3OC4zOGEuNjQuNjQsMCwwLDAtLjczLjczWiIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTUyOC43NiwyODkuM2ExLjA4LDEuMDgsMCwwLDEsMS4yNCwxLjI0djM3YTEuMDgsMS4wOCwwLDAsMS0xLjI0LDEuMjRoLTYuMDlhMS4wOCwxLjA4LDAsMCwxLTEuMjQtMS4yNHYtMzdhMS4wOCwxLjA4LDAsMCwxLDEuMjQtMS4yNFoiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik01NzAuMjMsMjg5LjNjMTEuNDQsMCwxNS43OCw0LjA1LDE1Ljc4LDE0Ljg3djkuN2MwLDEwLjgyLTQuMzQsMTQuODctMTUuNzgsMTQuODdINTUyLjgyYy0xMS4zOCwwLTE1LjcyLTQuMDUtMTUuNzItMTQuODd2LTkuN2MwLTEwLjgyLDQuMzQtMTQuODcsMTUuNzItMTQuODdabS0yNC41NywyMy45NWMwLDUuOTEsMS42OSw3LjY2LDcuNSw3LjY2SDU2OS45YzUuOCwwLDcuNDktMS43NSw3LjQ5LTcuNjZ2LTguNDZjMC01LjkxLTEuNjktNy42Ni03LjQ5LTcuNjZINTUzLjE2Yy01LjgxLDAtNy41LDEuNzUtNy41LDcuNjZaIi8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMzU4Ljg3LDBhLjc2Ljc2LDAsMCwwLDAsLjE1aC0yLjc0YS43Ni43NiwwLDAsMCwwLS4xNVoiLz48cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0zNzIuODMsMGEuNzYuNzYsMCwwLDAsMCwuMTVIMzcwLjFhLjc2Ljc2LDAsMCwwLDAtLjE1WiIvPjxwYXRoIGNsYXNzPSJjbHMtNCIgZD0iTTM3MC4xLjE1aDIuNzRjMy4zNy4xOCw2LjczLjQ3LDEwLjA5LjgycTQuNDQuNDUsOC44NiwxLjEsNSwuNzQsMTAsMS43NGM0Ljk0LDEsOS44NSwyLjEzLDE0LjcsMy41LDMuMDUuODcsNi4wNywxLjg0LDkuMDcsMi44OCwzLjY5LDEuMjgsNy4zNSwyLjY2LDExLDQuMWEyMS44NCwyMS44NCwwLDAsMSw4LjMyLDUuNiwyMy44NCwyMy44NCwwLDAsMSw0LjE2LDYuNTdBNDYuNzIsNDYuNzIsMCwwLDEsNDUyLDM3LjM0YTcyLjE2LDcyLjE2LDAsMCwxLC42MywxNC4yNCw5Ni43Nyw5Ni43NywwLDAsMS0xLjA5LDEwLjczLDk4LjE2LDk4LjE2LDAsMCwxLTEuOTIsMTAuMzVjLS45LDMuNTYtMS43NCw3LjE1LTIuODQsMTAuNjctLjg0LDIuNy0xLjcxLDUuMzktMi42NSw4LjA2LS44NSwyLjQtMS43OCw0Ljc4LTIuNzQsNy4xMy0uODUsMi4xLTEuNzgsNC4xNy0yLjcyLDYuMjMtLjg4LDEuOS0xLjgsMy43OS0yLjc2LDUuNjVzLTEuODIsMy41Mi0yLjgxLDUuMjRjLTEuNzcsMy4wNy0zLjU4LDYuMTEtNS41NCw5LjA2cS0yLjU2LDMuOS01LjM5LDcuNjQtMi42OSwzLjU2LTUuNTYsN2MtMS43MywyLTMuNSw0LTUuMzYsNS45M2ExMDkuMSwxMDkuMSwwLDAsMS04LjMyLDcuNzdBOTUuNDIsOTUuNDIsMCwwLDEsMzkyLDE2MWE5Myw5MywwLDAsMS0xNCw3LjE4LDU5LjYyLDU5LjYyLDAsMCwxLTcuMTQsMi40Nyw1LjIzLDUuMjMsMCwwLDEtMS40Mi4yNWMtLjgxLDAtMS4xNi0uMjYtMS4yMS0xLjA4YTEzLjY1LDEzLjY1LDAsMCwxLDAtMi4xMmMuMTUtMS45LjA5LTMuOC4xOS01LjY5LjE2LTMuMjksMC02LjU4LS4xMS05Ljg2LDAtMS4yOC0uMTYtMi41NS0uMjQtMy44MmE2LjE4LDYuMTgsMCwwLDEsMC0xLjM2Yy4xNC0uODcuNDUtMS4xOCwxLjMyLTEuMjdhMjIuMTgsMjIuMTgsMCwwLDEsMi4zLS4xNGMyLjM1LDAsNC43LDAsNy4wNi4wOWE2My43Nyw2My43NywwLDAsMCwxMC41Mi0uNSw0MC44NCw0MC44NCwwLDAsMCwxMC4wNS0yLjc2LDMyLjM5LDMyLjM5LDAsMCwwLDkuNTYtNi4wOCwzMi44OSwzMi44OSwwLDAsMCw0LjEtNC42NCwzOS45LDM5LjksMCwwLDAsMy01LDM1LjkzLDM1LjkzLDAsMCwwLDIuODEtNy45LDI2LjUsMjYuNSwwLDAsMCwuNjEtOC42OSwyNy43OCwyNy43OCwwLDAsMC0yLjA2LTguMywzMy42MywzMy42MywwLDAsMC02LjI5LTEwLjEyLDMyLjMxLDMyLjMxLDAsMCwwLTQuMDUtMy44OCw5LjY1LDkuNjUsMCwwLDEtMS0uOTMsMS4zLDEuMywwLDAsMSwwLTIuMTRBMjAuNDksMjAuNDksMCwwLDEsNDA3Ljg3LDgzYy4yNi0uMjIuNTMtLjQyLjc3LS42NmE0MS4xOSw0MS4xOSwwLDAsMCw0LjU0LTUuMDZBMzIuMywzMi4zLDAsMCwwLDQxOC44NSw2NWEyNy42NSwyNy42NSwwLDAsMCwuMjgtMTEuMTMsMzMuMTUsMzMuMTUsMCwwLDAtMi42Ni04LjMxYy0uNDUtLjk0LTEtMS44Ni0xLjQ2LTIuNzhhMzEuMjQsMzEuMjQsMCwwLDAtNi43LTguMjlBMzIuNzUsMzIuNzUsMCwwLDAsMzk2LjY4LDI4YTQ1LjQxLDQ1LjQxLDAsMCwwLTcuNzgtMS43OCw1OS43NSw1OS43NSwwLDAsMC05LjE3LS40NGwtOS4xOS4xMS0uNTksMGMtMS4xNC0uMDgtMS41My0uNDctMS41NC0xLjU5LDAtLjg1LDAtMS43LDAtMi41NXEwLTkuMjcsMC0xOC41NWE4LjcyLDguNzIsMCwwLDEsLjEtMS40NEExLjcsMS43LDAsMCwxLDM3MC4xLjE1WiIvPjxwYXRoIGNsYXNzPSJjbHMtNCIgZD0iTTM1Ni4xNC4xNWgyLjc0YTEuNTMsMS41MywwLDAsMSwxLjM2LDEuNDIsOS41Miw5LjUyLDAsMCwxLC4xNCwxLjZxMCwxMC40NywwLDIwLjkzYTUuNzYsNS43NiwwLDAsMSwwLC41OSwxLjE1LDEuMTUsMCwwLDEtMS4yOCwxLjE5Yy0xLjM5LDAtMi43OCwwLTQuMTcsMGwtNDEuNzksMGExMS42OCwxMS42OCwwLDAsMC0xLjg2LjE2LDEuODIsMS44MiwwLDAsMC0xLjY1LDEuNDgsNS4zNiw1LjM2LDAsMCwwLS4xNSwxLjI2cTAsOC4xNiwwLDE2LjMzYTUuNjgsNS42OCwwLDAsMCwwLC41OSwyLjM3LDIuMzcsMCwwLDAsMi4xNSwyLjQ1YzEuMjguMjcsMi41OC4zNCwzLjg1LjY5YTE1LjIyLDE1LjIyLDAsMCwxLDkuNDMsNywxNi4xNywxNi4xNywwLDAsMSwyLjI4LDcuODFjLjA4LDIuMTMsMCw0LjI2LDAsNi4zOHEwLDE4LjEyLDAsMzYuMjRhMTkuNCwxOS40LDAsMCwxLS44NSw2LjIsMTQuODksMTQuODksMCwwLDEtOS40Myw5LjU3LDI1LDI1LDAsMCwxLTguNDQsMS4yOWMtMi4yMiwwLTQuNDMsMC02LjY0LjA2YTIuMzEsMi4zMSwwLDAsMS0yLjI0LTEuMjRjLTEuNDctMi41NS0zLTUuMDYtNC40My03LjY1LTEtMS43OS0xLjg1LTMuNjMtMi44Mi01LjQyLTEuMDYtMi0xLjg4LTQtMi44NS02cy0xLjgxLTQuMjgtMi43NC02LjRjLTEuMDctMi40NC0xLjg2LTUtMi43OS03LjQ3LTEuMS0yLjk1LTEuODktNi0yLjgtOS0xLjE0LTMuNzQtMS44OC03LjU4LTIuNzQtMTEuMzhhOTksOTksMCwwLDEtMS43Ny0xMS41OCw4MC43Myw4MC43MywwLDAsMS0uNDUtOC4yM2MwLTIuODMsMC01LjY3LjI0LTguNDlhNDQuMTksNDQuMTksMCwwLDEsMS42MS05LjM2LDM3LjIyLDM3LjIyLDAsMCwxLDIuNTUtNi41N0EyMS4yOSwyMS4yOSwwLDAsMSwyODUuODcsMThhMjMsMjMsMCwwLDEsNS45LTMuNDljMy4zNy0xLjQyLDYuNzctMi43NSwxMC4yMi00YTE4NC4wNywxODQuMDcsMCwwLDEsMTguMjctNS4yN3E3Ljc0LTEuODEsMTUuNTktMyw1LjgzLS45MSwxMS43My0xLjQ0QzM1MC40My41NiwzNTMuMjguMywzNTYuMTQuMTVaIi8+PHBhdGggY2xhc3M9ImNscy00IiBkPSJNMzY4LjY2LDcxLjkxSDM1NC41M0ExMSwxMSwwLDAsMSwzNTMsNzEuOGExLjYzLDEuNjMsMCwwLDEtMS40Ny0xLjMzLDUuMjksNS4yOSwwLDAsMS0uMTQtMS4yNnEwLTkuMTgsMC0xOC4zN2MwLS4yMywwLS40NiwwLS42OC4xOC0xLjU5Ljc2LTIsMi4zMi0yLjE2LjUsMCwxLDAsMS41MywwLDksMCwxOC0uMDgsMjcuMDYsMGExMC43NywxMC43NywwLDAsMSw2LjM3LDIsOC40Miw4LjQyLDAsMCwxLDEuMzEsMS4yMkExMi4xMywxMi4xMywwLDAsMSwzOTIuODIsNTdhMTQuNDIsMTQuNDIsMCwwLDEtMSw5LjI5LDkuMjcsOS4yNywwLDAsMS03LjEsNS4zNSwyNi4yMiwyNi4yMiwwLDAsMS00LjMzLjI1QzM3Ni40OSw3MS45NCwzNzIuNTcsNzEuOTEsMzY4LjY2LDcxLjkxWiIvPjxwYXRoIGNsYXNzPSJjbHMtNCIgZD0iTTM2OC41MSwxMjMuMzhjLTQuNTYsMC05LjEzLDAtMTMuNywwYTcuNSw3LjUsMCwwLDEtMS45NC0uMTcsMS43MywxLjczLDAsMCwxLTEuMzEtMS40MSw3Ljc1LDcuNzUsMCwwLDEtLjE2LTEuNnEwLTguOTIsMC0xNy44NmE2LjksNi45LDAsMCwxLC4xNy0xLjQzLDEuNjIsMS42MiwwLDAsMSwxLjM1LTEuMzYsNy42OCw3LjY4LDAsMCwxLDEuNTEtLjE3YzguNjgsMCwxNy4zNiwwLDI2LDBhMTkuODIsMTkuODIsMCwwLDEsNC40Ny40OSwxMC41MiwxMC41MiwwLDAsMSw4LjE5LDkuMywxNi4xMywxNi4xMywwLDAsMS0uNzcsNi44NywxMC42MSwxMC42MSwwLDAsMS00LjM0LDUuNywxMC4zOSwxMC4zOSwwLDAsMS01LjEzLDEuNiw1LjgyLDUuODIsMCwwLDEtLjU5LDBaIi8+PHBhdGggY2xhc3M9ImNscy00IiBkPSJNMzM5LDE0NS41MkgzNTguN2E0LjM1LDQuMzUsMCwwLDEsLjUxLDBjLjg1LjE0LDEuMTkuNDksMS4yLDEuMzYsMCwxLjE5LDAsMi4zOCwwLDMuNTd2MTkuMjJjMCwxLjUyLS4xNCwxLjYyLTEuNjMsMS4yYTc3LjkzLDc3LjkzLDAsMCwxLTEwLjgzLTQsODguNjgsODguNjgsMCwwLDEtMTQuMTEtOGMtMi44Mi0yLTUuNTMtNC04LjE2LTYuMjUtMi4zMy0xLjk0LTQuNDktNC4wNi02LjcxLTYuMTJhMS43NywxLjc3LDAsMCwxLS4zMS0uMy40My40MywwLDAsMSwuMzMtLjczYy4zNiwwLC43MywwLDEuMSwwbDE4LjEyLDBaIi8+PC9nPjwvZz48L3N2Zz4='alt="Logo"> 
+           </h1>
 
         <div class="gif-display">
             <div class="gif-display-wrapper">
@@ -317,95 +319,164 @@
     </div>
 
     <script>
-        const esp32Ip = "http://4.3.2.1";
-        const gifInput = document.getElementById('gif-input');
-        const uploadButton = document.getElementById('upload-btn');
-        const gifList = document.getElementById('gif-list');
-        const currentGif = document.getElementById('current-gif');
-        const placeholderText = document.querySelector('.placeholder');
+            const esp32Ip = "http://4.3.2.1";
+            // const esp32Ip = "http://127.0.0.1:3000";
 
-        let uploadedGifs = [];
+            const gifInput = document.getElementById('gif-input');
+            const uploadButton = document.getElementById('upload-btn');
+            const gifList = document.getElementById('gif-list');
+            const currentGif = document.getElementById('current-gif');
+            const placeholderText = document.querySelector('.placeholder');
+            const canvas = document.getElementById('gifCanvas');
 
-        // Event Listener for Upload Button
-        uploadButton.addEventListener('click', () => {
-            const file = gifInput.files[0];
+            let uploadedGifs = [];
+            let firstFrameBlob = null;
 
-            if (file && file.type === 'image/gif') {
-                const reader = new FileReader();
+            async function fetchData() {
+                    try {
+                        const response = await fetch(`${esp32Ip}/list`);
+                        const data = await response.text();
+                        if(!data){
+                            return
+                        }
+                        const files = data.split("\n");
+                        gifList.innerHTML = '';
 
-                reader.onload = (event) => {
-                    const gifUrl = event.target.result;
+                        if (files.length === 0) {
+                            placeholderText.style.display = 'block';
+                            placeholderText.textContent = "No GIF files found on the SD card.";
+                        } else {
+                            placeholderText.style.display = 'none';
+                            uploadedGifs = [];
 
-                    // Add to uploaded GIFs list
-                    uploadedGifs.push(gifUrl);
-                    displayGifList();
+                            for (let i = 0; i < files.length; i++) {
+                                const file = files[i];
+                                const listItem = document.createElement("li");
+                                listItem.classList.add("file-item");
+                                listItem.innerHTML = `
+                                <div class="file-info">
+                                    <img id="img-${i}" alt="Loading GIF..." width="100">
+                                    <span>${file}</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-danger" onclick="deleteFile('${file}')">Delete</button>
+                                </div>
+                                    `;
+                                gifList.appendChild(listItem);
+                                uploadedGifs.push(`img-${i}`);
+                                listItem.addEventListener("click", function () {
+                                    setFile(file)
+                                });
+                            }
 
-                    // Set the current GIF
-                    currentGif.src = gifUrl;
-                    currentGif.style.display = 'block';
-                    placeholderText.style.display = 'none';
-                };
+                            // Load each GIF thumbnail
+                            for (let i = 0; i < files.length; i++) {
+                                const file = files[i];
+                                const imgElementId = uploadedGifs[i];
+                                const imgElement = document.getElementById(imgElementId);
 
-                reader.readAsDataURL(file);
-            } else {
-                alert('Please select a valid GIF file.');
-            }
-        });
-
-        async function fetchData(){
-
-            try{
-                const response = await fetch(`${esp32Ip}/list`);
-                const data = await response.text();
-                const files = data.split("\n").filter(file => file.endsWith('.gif'));
-                  if (files.length === 0) {
-                    fileList.innerHTML = "<li>No GIF files found on the SD card.</li>";
-                } else {
-                     placeholderText.style.display = 'none';
-                     files.forEach((file, index) => {
-                          const listItem = document.createElement("li");
-                          listItem.classList.add("file-item");
-                          listItem.innerHTML = `
-                    <div>
-                        <img id="img-${index}" src="placeholder.jpg" alt="Loading GIF..." width="100">
-                        <span>${file}</span>
-                    </div>
-                    <div>
-                        <button class="btn" onclick="viewFile('${file}')">SET</button>
-                        <button class="btn btn-danger" onclick="deleteFile('${file}')">Delete</button>
-                    </div>
-                `;
-                          gifList.appendChild(listItem);
-                          uploadedGifs.push(`img-${index}`);
-                      });
-                       for (let i = 0; i < files.length; i++) {
-                          const file = files[i];
-                          const imgElementId = uploadedGifs[i];
-                          const imgElement = document.getElementById(imgElementId);
-
-                          try {
-                              await loadImage(`${esp32Ip}/${file}`);
-                              imgElement.src = `${esp32Ip}/${file}`;
-                          } catch (imgError) {
-                              console.error(`Failed to load image ${file}:`, imgError);
-                              imgElement.src = "error-placeholder.jpg";
-                              imgElement.alt = "Failed to load image.";
-
-                              const errorMsg = document.createElement("li");
-                              errorMsg.classList.add("error-item");
-                              errorMsg.textContent = `Failed to load image: ${file}`;
-                              fileList.appendChild(errorMsg);
-                          }
-                      }
+                                try {
+                                    await loadImage(`${esp32Ip}/cache/${file}`);
+                                    imgElement.src = `${esp32Ip}/cache/${file}`;
+                                } catch (imgError) {
+                                    console.error(`Failed to load image ${file}:`, imgError);
+                                    // imgElement.src = "error-placeholder.jpg";
+                                    imgElement.alt = "Failed to load image.";
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to load file list:', error);
+                        placeholderText.style.display = 'block';
+                        placeholderText.textContent = "Failed to load file list from the device.";
+                    }
                 }
-            }catch{
-               
 
-            }
+            // Event Listener for Upload Button
+            uploadButton.addEventListener('click', async () => {
+                const file = gifInput.files[0];
+                if (file && file.type === 'image/gif') {
+                    try{
+                        const formData = new FormData();
+                        formData.append('data', file, file.name)
 
-        }
+                        const response = await fetch(`${esp32Ip}/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
 
-        function loadImage(url) {
+                        if(!response.ok){
+                            console.error('Error Upload Image:', response.statusText);
+                            alert('Failed to upload the first image frame.');
+                            return;
+                        }
+
+                    } catch (error) {
+                        console.error('Error uploading the first frame:', error);
+                        alert('Error uploading the first frame.');
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = async (event) => {
+                        const gifUrl = event.target.result;
+                        const img = new Image();
+                        img.crossOrigin = "Anonymous";
+                        img.src = gifUrl;
+
+                        img.onload = async function () {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+
+                            // Draw the first frame of the GIF onto the canvas
+                            ctx.drawImage(img, 0, 0);
+
+                            // Convert to a Blob (JPEG format with 70% quality) for uploading
+                            canvas.toBlob(async function (blob) {
+                                firstFrameBlob = blob;
+
+                                // Upload the compressed first frame blob to the server
+                                try {
+                                    const formData = new FormData();
+                                    // formData.append('file', firstFrameBlob, file.name);
+                                    formData.append('image', firstFrameBlob, file.name);
+
+                                    const response = await fetch(`${esp32Ip}/upload-cache`, {
+                                        method: 'POST',
+                                        body: formData
+                                    });
+
+                                    if (!response.ok) {
+                                        console.error('Error uploading first frame:', response.statusText);
+                                        alert('Failed to upload the first image frame.');
+                                        return;
+                                    }
+
+                                    alert('First image frame uploaded successfully!');
+
+                                    // After successful upload, you can display the original GIF or handle next steps
+                                    currentGif.src = gifUrl;
+                                    await fetchData();
+
+                                } catch (error) {
+                                    console.error('Error uploading the first frame:', error);
+                                    alert('Error uploading the first frame.');
+                                }
+
+                            }, 'image/jpeg', 0.5);
+                        };
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please select a valid GIF file.');
+                }
+            });
+
+            
+
+            function loadImage(url) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
                     img.onload = () => resolve();
@@ -414,23 +485,14 @@
                 });
             }
 
-        // Function to Display Uploaded GIFs in the List
-        function displayGifList() {
-            gifList.innerHTML = '';
-            if (uploadedGifs.length === 0) {
-                gifList.innerHTML = `<p class="placeholder">No GIFs uploaded yet.</p>`;
-                return;
+            function deleteFile(file){
+                console.log(file.replace('.jpg', ''))
             }
-            uploadedGifs.forEach((gifUrl, index) => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <img src="${gifUrl}" alt="GIF ${index + 1}">
-                    <span>GIF ${index + 1}</span>
-                `;
-                gifList.appendChild(listItem);
-            });
-        }
-        fetchData();
+            function setFile(file){
+                console.log(file.replace('.jpg', ''))
+            }
+            fetchData();
+
     </script>
 </body>
 

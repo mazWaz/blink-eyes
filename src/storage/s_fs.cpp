@@ -4,36 +4,73 @@ SFS::SFS() : _chipSelectPin(5) {}
 
 bool SFS::init(int chipSelectPin) {
     _chipSelectPin = chipSelectPin;
-    return SD.begin(_chipSelectPin);
-}
 
-bool SFS::saveFile(const String& filename, const uint8_t* data, size_t size) {
-    File file = SD.open(filename, FILE_WRITE);
-    if (!file) {
-        Serial.println("Failed to open file for writing");
+    if (!SD.begin(_chipSelectPin)) {
         return false;
     }
-    file.write(data, size);
-    file.close();
+
+    uint8_t cardType = SD.cardType();
+    if (cardType == CARD_NONE) {
+        return false;
+    }
+    checkDir();
+
+    Serial.println("Success Begin SD Card");
+
+    return true;
+}
+
+bool SFS::checkDir() {
+    if (SD.exists("/image")) {
+        if (!SD.mkdir("/image")) {
+            return false;
+        }
+    }
+
+    if (SD.exists("/cache")) {
+        if (!SD.mkdir("/cache")) {
+            return false;
+        }
+    }
+
     return true;
 }
 
 bool SFS::deleteFile(const String& filename) {
-    if (SD.exists(filename)) {
-        SD.remove(filename);
-        return true;
+    if (SD.exists("/image/" + filename)) {
+        if (!SD.remove("/image/" + filename)) {
+            return false;
+        }
     }
+
+    if (SD.exists("/cache/" + filename)) {
+        if (!SD.remove("/cache/" + filename)) {
+            return false;
+        }
+    }
+
     return false;
 }
 
-bool SFS::exists(const String& filename) { return SD.exists(filename); }
+bool SFS::fileExists(String fileName) {
+    if (!SD.exists("/image/" + fileName)) {
+        return false;
+    }
+    if (!SD.exists("/cache/" + fileName)) {
+        return false;
+    }
+    return true;
+}
 
 String SFS::listFiles() {
     String fileList = "";
-    File dir = SD.open("/");
+    File dir = SD.open("/cache");
+
     while (File entry = dir.openNextFile()) {
         fileList += String(entry.name()) + "\n";
         entry.close();
     }
+    dir.close();
+
     return fileList;
 }

@@ -9,13 +9,14 @@ class SFS {
    public:
     SFS();
     bool init(int chipSelectPin = 5);
-    bool saveFile(const String& filename, const uint8_t* data, size_t size);
+    bool checkDir();
+
     bool deleteFile(const String& filename);
-    bool exists(const String& filename);
+    bool fileExists(String fileName);
     String listFiles();
 
    private:
     int _chipSelectPin;
 };
 
-#endif  // S_FS_H
+#endif
