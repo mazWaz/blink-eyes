@@ -96,7 +96,7 @@ bool SSPIFFS::saveWifi(uint8_t wifiAP, uint8_t password) {
 }
 
 bool SSPIFFS::saveGif(String gifFileName) {
-    if (!SPIFFS.exists("/config.json")) {
+    if (SPIFFS.exists("/config.json")) {
         File file = SPIFFS.open("/config.json", FILE_WRITE);
         if (!file) {
             return false;

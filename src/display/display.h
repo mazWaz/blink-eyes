@@ -1,9 +1,9 @@
-#include <display/ui/ui.h>
-#include <lvgl.h>
-
-#include <vector>
+#include <AnimatedGIF.h>
+#include <FS.h>
+#include <SD.h>
 
 #include "lovyanGfxSetup.h"
+#include "storage/s_fs.h"
 
 #define TFT_HOR_RES SCREEN_WIDTH
 #define TFT_VER_RES SCREEN_HEIGHT
@@ -11,26 +11,15 @@
 
 class Display {
    private:
-    LGFX tft;
+    static LGFX tft;
+    AnimatedGIF gif;
+    SFS &_fs;
 
-    int32_t tftHorRes = SCREEN_WIDTH;
-    int32_t tftVerRes = SCREEN_HEIGHT;
-    uint8_t *draw_buf = nullptr;
-
-    static void disp_flush(lv_display_t *disp, const lv_area_t *area,
-                           uint8_t *px_map);
-
-#if LV_USE_LOG != 0
-    static void my_print(lv_log_level_t level, const char *buf) {
-        LV_UNUSED(level);
-        Serial.println(buf);
-        Serial.flush();
-    }
-#endif
+    static void GIFDraw(GIFDRAW *pDraw);  // Change return type to void
 
    public:
-    Display();
-    ~Display();
+    Display(SFS &fs);
+
     void init();
     void loop();
 };

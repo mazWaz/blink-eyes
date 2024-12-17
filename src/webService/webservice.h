@@ -17,8 +17,6 @@ class WebService {
     void dnsRequest();
     void pageRequest();
     void routes();
-    void handleUpload(AsyncWebServerRequest *request, String filename,
-                      size_t index, uint8_t *data, size_t len, bool final);
 
    public:
     WebService(SFS &fs);

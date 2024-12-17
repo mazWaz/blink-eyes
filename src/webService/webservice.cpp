@@ -54,20 +54,47 @@ void WebService::routes() {
         request->send(200, "text/plain", fileList);
     });
 
-    server.on("/set", HTTP_POST, [this](AsyncWebServerRequest *request) {
-        if (request->hasParam("file_name", true)) {
-            AsyncWebParameter *p = request->getParam("file_name", true);
+    server.on("/set", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        if (request->hasParam("file")) {
+            String filename = request->getParam("file")->value();
+            if (_fs.fileExists(filename)) {
+                if (spiffs.saveGif(filename)) {
+                    request->send(200, "text/plain", "File Set successfully");
+                    return;
+                }
+                request->send(404, "text/plain", "File Not Found Failed");
 
-            if (_fs.fileExists(p->value())) {
-                request->send(200, "text/plain", "Set Success");
+            } else {
+                request->send(404, "text/plain", "File not found");
                 return;
             }
-            // if (spiffs.saveGif(setFile)) {
-            //     request->send(200, "text/plain", "Set Success");
-            //     return;
-            // }
-            Serial.print(p->value());
+        }
+        request->send(400, "text/plain", "Filename not specified");
+        return;
+    });
+
+    server.on("/get-wifi-ap", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        String setFile = spiffs.getWifiAp();
+        if (setFile) {
+            request->send(200, "text/plain", setFile);
+        } else {
+            request->send(404, "text/plain", "Not Found");
+        }
+    });
+
+    server.on("/set-wifi-ap", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        if (request->hasParam("wifi_ap", true) &&
+            request->hasParam("wifi_password", true)) {
+            AsyncWebParameter *p_ap = request->getParam("wifi_ap", true);
+            AsyncWebParameter *p_password =
+                request->getParam("wifi_password", true);
+
+            Serial.print("wifi AP: ");
+            Serial.println(p_ap->value());
+            Serial.print("wifi Pass: ");
+            Serial.println(p_password->value());
             request->send(400, "text/plain", "Fail To Set");
+
             return;
         } else {
             request->send(400, "text/plain", "Fail To Set");
@@ -80,7 +107,6 @@ void WebService::routes() {
         "/upload", HTTP_POST, [this](AsyncWebServerRequest *request) {},
         [this](AsyncWebServerRequest *request, const String &filename,
                size_t index, uint8_t *data, size_t len, bool final) {
-            Serial.printf("UploadStart: %s\n", filename.c_str());
             if (!index) {
                 request->_tempFile =
                     SD.open(("/image/" + filename).c_str(), FILE_WRITE);
@@ -107,21 +133,34 @@ void WebService::routes() {
             }
             if (final) {
                 request->_tempFile.close();
+                if (_fs.fileExists(filename)) {
+                    if (spiffs.saveGif(filename)) {
+                        request->send(200, "text/plain", "Upload complete.");
+                        return;
+                    }
+                }
                 request->send(200, "text/plain", "Upload complete.");
             }
         });
 
     server.on("/delete", HTTP_GET, [this](AsyncWebServerRequest *request) {
-        if (request->hasParam("file_name")) {
-            String filename = request->getParam("file_name")->value();
-            if (_fs.deleteFile(filename)) {
-                request->send(200, "text/plain", "File deleted successfully");
+        if (request->hasParam("file")) {
+            String filename = request->getParam("file")->value();
+            if (_fs.fileExists(filename)) {
+                if (_fs.deleteFile(filename)) {
+                    request->send(200, "text/plain",
+                                  "File deleted successfully");
+                    return;
+                }
+                request->send(404, "text/plain", "File not found1");
+                return;
             } else {
-                request->send(404, "text/plain", "File not found");
+                request->send(404, "text/plain", "File not found2");
+                return;
             }
-        } else {
-            request->send(400, "text/plain", "Filename not specified");
         }
+        request->send(400, "text/plain", "Filename not specified");
+        return;
     });
 }
 
@@ -159,18 +198,4 @@ void WebService::dnsRequest() {
         this->setStaticContentCacheHeaders(response);
         request->send(response);
     });
-}
-
-void WebService::handleUpload(AsyncWebServerRequest *request, String filename,
-                              size_t index, uint8_t *data, size_t len,
-                              bool final) {
-    if (!index) {
-        Serial.printf("UploadStart: %s\n", filename.c_str());
-    }
-    for (size_t i = 0; i < len; i++) {
-        Serial.write(data[i]);
-    }
-    if (final) {
-        Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index + len);
-    }
 }

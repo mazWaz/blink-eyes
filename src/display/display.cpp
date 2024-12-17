@@ -1,69 +1,109 @@
 #include "display.h"
+LGFX Display::tft;
 
-Display::Display() {
-    draw_buf = (uint8_t *)malloc(DRAW_BUF_SIZE);
-    if (!draw_buf) {
-        Serial.println("Buffer allocation failed.");
-    }
-}
-
-Display::~Display() {
-    if (draw_buf) {
-        free(draw_buf);
-        draw_buf = nullptr;
-    }
-}
-
+Display::Display(SFS &fs) : _fs(fs) {}
 void Display::init() {
-    tft.begin();
-    tft.setRotation(2);
-    tft.setBrightness(255);
-    tft.fillScreen(TFT_BLACK);
-
-    lv_init();
-    lv_tick_set_cb((lv_tick_get_cb_t)millis);
-
-#if LV_USE_LOG != 0
-    lv_log_register_print_cb(my_print);
-#endif
-
-    lv_display_t *disp = lv_display_create(tftHorRes, tftVerRes);
-    if (!disp) {
-        return;
-    }
-
-    lv_display_set_flush_cb(disp, disp_flush);
-    lv_display_set_user_data(disp, this);
-
-    lv_display_set_buffers(disp, draw_buf, NULL, DRAW_BUF_SIZE,
-                           LV_DISPLAY_RENDER_MODE_PARTIAL);
-
-    lv_indev_t *indev = lv_indev_create();
-    if (!indev) {
-        return;
-    }
-    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-
-    ui_init();
+    tft.init();
+    tft.setRotation(3);  // Set display orientation (adjust if needed)
+    tft.setColorDepth(24);
+    tft.fillScreen(TFT_BLACK);  // Clear the screen with black color
 }
 
 void Display::loop() {
-    lv_timer_handler();
-    delay(5);
+    if (gif.open("/image/image11.GIF", _fs.GIFOpenFile, _fs.GIFCloseFile,
+                 _fs.GIFReadFile, _fs.GIFSeekFile, GIFDraw)) {
+        GIFINFO gi;
+        Serial.printf("Successfully opened GIF; Canvas size = %d x% d\n ",
+                      gif.getCanvasWidth(), gif.getCanvasHeight());
+        if (gif.getInfo(&gi)) {
+            Serial.printf("frame count: %d\n", gi.iFrameCount);
+            Serial.printf("duration: %d ms\n", gi.iDuration);
+            Serial.printf("max delay: %d ms\n", gi.iMaxDelay);
+            Serial.printf("min delay: %d ms\n", gi.iMinDelay);
+        }
+        while (gif.playFrame(true, NULL)) {
+        }
+        gif.close();
+    } else {
+        Serial.printf("Error opening file = %d\n", gif.getLastError());
+        while (1) {
+        };
+    }
 }
 
-void Display::disp_flush(lv_display_t *disp, const lv_area_t *area,
-                         uint8_t *px_map) {
-    Display *display = static_cast<Display *>(lv_display_get_user_data(disp));
-    LGFX *tft = &display->tft;
+void Display::GIFDraw(GIFDRAW *pDraw) {
+    uint8_t *s;
+    uint16_t *d, *usPalette, usTemp[320];
+    int x, y, iWidth;
 
-    uint32_t w = lv_area_get_width(area);
-    uint32_t h = lv_area_get_height(area);
+    iWidth = pDraw->iWidth;
 
-    tft->startWrite();
-    tft->setAddrWindow(area->x1, area->y1, w, h);
-    tft->writePixels((lgfx::rgb565_t *)px_map, w * h);
-    tft->endWrite();
+    if (iWidth + pDraw->iX > 240) iWidth = 240 - pDraw->iX;
+    usPalette = pDraw->pPalette;
+    y = pDraw->iY + pDraw->y;  // current line
+    if (y >= 240 || pDraw->iX >= 240 || iWidth < 1) return;
+    s = pDraw->pPixels;
+    if (pDraw->ucDisposalMethod == 2)  // restore to background color
+    {
+        for (x = 0; x < iWidth; x++) {
+            if (s[x] == pDraw->ucTransparent) s[x] = pDraw->ucBackground;
+        }
+        pDraw->ucHasTransparency = 0;
+    }
 
-    lv_disp_flush_ready(disp);
+    // Apply the new pixels to the main image
+    if (pDraw->ucHasTransparency)  // if transparency used
+    {
+        uint8_t *pEnd, c, ucTransparent = pDraw->ucTransparent;
+        int x, iCount;
+        pEnd = s + iWidth;
+        x = 0;
+        iCount = 0;  // count non-transparent pixels
+        while (x < iWidth) {
+            c = ucTransparent - 1;
+            d = usTemp;
+            while (c != ucTransparent && s < pEnd) {
+                c = *s++;
+                if (c == ucTransparent)  // done, stop
+                {
+                    s--;  // back up to treat it like transparent
+                } else    // opaque
+                {
+                    *d++ = usPalette[c];
+                    iCount++;
+                }
+            }  // while looking for opaque pixels
+            if (iCount)  // any opaque pixels?
+            {
+                tft.startWrite();
+                tft.setAddrWindow(pDraw->iX + x, y, iCount, 1);
+                tft.writePixels((lgfx::rgb565_t *)usTemp, iCount);
+                tft.endWrite();
+                x += iCount;
+                iCount = 0;
+            }
+            // no, look for a run of transparent pixels
+            c = ucTransparent;
+            while (c == ucTransparent && s < pEnd) {
+                c = *s++;
+                if (c == ucTransparent)
+                    iCount++;
+                else
+                    s--;
+            }
+            if (iCount) {
+                x += iCount;  // skip these
+                iCount = 0;
+            }
+        }
+    } else {
+        s = pDraw->pPixels;
+        // Translate the 8-bit pixels through the RGB565 palette (already
+        // byte reversed)
+        for (x = 0; x < iWidth; x++) usTemp[x] = usPalette[*s++];
+        tft.startWrite();
+        tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
+        tft.writePixels((lgfx::rgb565_t *)usTemp, iWidth);
+        tft.endWrite();
+    }
 }

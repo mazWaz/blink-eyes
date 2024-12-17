@@ -22,13 +22,13 @@ bool SFS::init(int chipSelectPin) {
 
 bool SFS::checkDir() {
     if (SD.exists("/image")) {
-        if (!SD.mkdir("/image")) {
+        if (!SD.mkdir("/image/")) {
             return false;
         }
     }
 
     if (SD.exists("/cache")) {
-        if (!SD.mkdir("/cache")) {
+        if (!SD.mkdir("/cache/")) {
             return false;
         }
     }
@@ -36,7 +36,7 @@ bool SFS::checkDir() {
     return true;
 }
 
-bool SFS::deleteFile(const String& filename) {
+bool SFS::deleteFile(const String &filename) {
     if (SD.exists("/image/" + filename)) {
         if (!SD.remove("/image/" + filename)) {
             return false;
@@ -49,14 +49,17 @@ bool SFS::deleteFile(const String& filename) {
         }
     }
 
-    return false;
+    return true;
 }
 
 bool SFS::fileExists(String fileName) {
     if (!SD.exists("/image/" + fileName)) {
         return false;
+        Serial.println("/Image file Not found");
     }
     if (!SD.exists("/cache/" + fileName)) {
+        Serial.println("/cache file Not found");
+
         return false;
     }
     return true;
@@ -70,7 +73,56 @@ String SFS::listFiles() {
         fileList += String(entry.name()) + "\n";
         entry.close();
     }
+    if (fileList.length() > 0) {
+        fileList.remove(fileList.length() -
+                        1);  // Remove last character (newline)
+    }
     dir.close();
 
     return fileList;
+}
+
+File SFS::openFile(const char *fname) { return SD.open(fname); }
+
+void SFS::closeFile(File *f) {
+    if (f != NULL) {
+        f->close();
+    }
+}
+
+void *SFS::GIFOpenFile(const char *fname, int32_t *pSize) {
+    File f = SD.open(fname);
+    if (f) {
+        *pSize = f.size();
+        return (void *)&f;
+    }
+    return NULL;
+}
+
+void SFS::GIFCloseFile(void *pHandle) {
+    File *f = static_cast<File *>(pHandle);
+    Serial.println(f.size());
+
+    if (f != NULL) {
+        f->close();
+    }
+}
+
+int32_t SFS::GIFReadFile(GIFFILE *pFile, uint8_t *pBuf, int32_t iLen) {
+    int32_t iBytesRead = iLen;
+    File *f = static_cast<File *>(pFile->fHandle);
+    if ((pFile->iSize - pFile->iPos) < iLen)
+        iBytesRead =
+            pFile->iSize - pFile->iPos - 1;  // Workaround for read past EOF
+    if (iBytesRead <= 0) return 0;
+    iBytesRead = (int32_t)f->read(pBuf, iBytesRead);
+    pFile->iPos = f->position();
+    return iBytesRead;
+}
+
+int32_t SFS::GIFSeekFile(GIFFILE *pFile, int32_t iPosition) {
+    File *f = static_cast<File *>(pFile->fHandle);
+    f->seek(iPosition);
+    pFile->iPos = (int32_t)f->position();
+    return pFile->iPos;
 }
