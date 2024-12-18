@@ -7,8 +7,9 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
-class SFS {
-   public:
+class SFS
+{
+public:
     SFS();
     bool init(int chipSelectPin = 5);
     bool checkDir();
@@ -24,11 +25,16 @@ class SFS {
     static void GIFCloseFile(void *pHandle);
     static int32_t GIFReadFile(GIFFILE *pFile, uint8_t *pBuf, int32_t iLen);
     static int32_t GIFSeekFile(GIFFILE *pFile, int32_t iPosition);
+    String getListFile()
+    {
+        return listFile;
+    }
 
-   private:
+private:
     static const char *szFilename;
     int _chipSelectPin;
-    static File f;
+    static File gifFile;
+    String listFile = "";
 };
 
 #endif
