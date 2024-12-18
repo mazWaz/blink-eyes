@@ -20,7 +20,7 @@ class WebService {
 
    public:
     WebService(SFS &fs);
-
+    static String processor(const String &var);
     void init();
     void loop();
 };

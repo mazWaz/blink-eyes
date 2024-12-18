@@ -15,7 +15,9 @@ class Display {
     AnimatedGIF gif;
     SFS &_fs;
 
-    static void GIFDraw(GIFDRAW *pDraw);  // Change return type to void
+    String currentFile = "";
+
+    static void GIFDraw(GIFDRAW *pDraw);
 
    public:
     Display(SFS &fs);

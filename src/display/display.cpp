@@ -1,4 +1,9 @@
 #include "display.h"
+
+#include "../storage/s_spiffs.h"  // Make sure the path to s_spiffs.h is correct
+
+extern SSPIFFS spiffs;  // Declare the spiffs object here
+
 LGFX Display::tft;
 
 Display::Display(SFS &fs) : _fs(fs) {}
@@ -10,24 +15,25 @@ void Display::init() {
 }
 
 void Display::loop() {
-    if (gif.open("/image/image11.GIF", _fs.GIFOpenFile, _fs.GIFCloseFile,
-                 _fs.GIFReadFile, _fs.GIFSeekFile, GIFDraw)) {
-        GIFINFO gi;
-        Serial.printf("Successfully opened GIF; Canvas size = %d x% d\n ",
-                      gif.getCanvasWidth(), gif.getCanvasHeight());
-        if (gif.getInfo(&gi)) {
-            Serial.printf("frame count: %d\n", gi.iFrameCount);
-            Serial.printf("duration: %d ms\n", gi.iDuration);
-            Serial.printf("max delay: %d ms\n", gi.iMaxDelay);
-            Serial.printf("min delay: %d ms\n", gi.iMinDelay);
+    if (_fs.fileExists(spiffs.getGifFile())) {
+        String fileName = "/image/" + String(spiffs.getGifFile());
+        currentFile = String(spiffs.getGifFile());
+        
+        if (gif.open(fileName.c_str(), _fs.GIFOpenFile, _fs.GIFCloseFile,
+                     _fs.GIFReadFile, _fs.GIFSeekFile, GIFDraw)) {
+            GIFINFO gi;
+            while (currentFile == spiffs.getGifFile()) {
+                while (gif.playFrame(false, NULL)) {
+                }
+                gif.reset();
+            }
+
+            gif.close();
+        } else {
+            Serial.printf("Error opening file = %d\n", gif.getLastError());
+            while (1) {
+            };
         }
-        while (gif.playFrame(true, NULL)) {
-        }
-        gif.close();
-    } else {
-        Serial.printf("Error opening file = %d\n", gif.getLastError());
-        while (1) {
-        };
     }
 }
 

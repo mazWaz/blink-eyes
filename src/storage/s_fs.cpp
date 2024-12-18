@@ -1,4 +1,7 @@
 #include "s_fs.h"
+
+extern SemaphoreHandle_t mutex;
+
 #define SD_CS_PIN 5  // Pin connected to SD card CS (modify as per your setup)
 SFS::SFS() : _chipSelectPin(5) {}
 
@@ -37,74 +40,83 @@ bool SFS::checkDir() {
 }
 
 bool SFS::deleteFile(const String &filename) {
-    if (SD.exists("/image/" + filename)) {
-        if (!SD.remove("/image/" + filename)) {
-            return false;
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+        if (SD.exists("/image/" + filename)) {
+            if (!SD.remove("/image/" + filename)) {
+                return false;
+            }
         }
-    }
 
-    if (SD.exists("/cache/" + filename)) {
-        if (!SD.remove("/cache/" + filename)) {
-            return false;
+        if (SD.exists("/cache/" + filename)) {
+            if (!SD.remove("/cache/" + filename)) {
+                return false;
+            }
         }
+        xSemaphoreGive(mutex);
+        return true;
     }
-
-    return true;
 }
 
 bool SFS::fileExists(String fileName) {
-    if (!SD.exists("/image/" + fileName)) {
-        return false;
-        Serial.println("/Image file Not found");
-    }
-    if (!SD.exists("/cache/" + fileName)) {
-        Serial.println("/cache file Not found");
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+        if (!SD.exists("/image/" + fileName)) {
+            return false;
+            Serial.println("/Image file Not found");
+        }
+        if (!SD.exists("/cache/" + fileName)) {
+            Serial.println("/cache file Not found");
 
-        return false;
+            return false;
+        }
+        xSemaphoreGive(mutex);
+        return true;
     }
-    return true;
 }
 
 String SFS::listFiles() {
-    String fileList = "";
-    File dir = SD.open("/cache");
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+        String fileList = "";
+        File dir = SD.open("/cache");
 
-    while (File entry = dir.openNextFile()) {
-        fileList += String(entry.name()) + "\n";
-        entry.close();
-    }
-    if (fileList.length() > 0) {
-        fileList.remove(fileList.length() -
-                        1);  // Remove last character (newline)
-    }
-    dir.close();
-
-    return fileList;
-}
-
-File SFS::openFile(const char *fname) { return SD.open(fname); }
-
-void SFS::closeFile(File *f) {
-    if (f != NULL) {
-        f->close();
+        while (File entry = dir.openNextFile()) {
+            fileList += String(entry.name()) + "\n";
+            entry.close();
+        }
+        if (fileList.length() > 0) {
+            fileList.remove(fileList.length() -
+                            1);  // Remove last character (newline)
+        }
+        dir.close();
+        xSemaphoreGive(mutex);
+        return fileList;
     }
 }
 
 void *SFS::GIFOpenFile(const char *fname, int32_t *pSize) {
-    File f = SD.open(fname);
-    if (f) {
-        *pSize = f.size();
-        return (void *)&f;
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+        if (pSize == nullptr) {
+            return NULL;
+        }
+        File *f = new File(SD.open(fname));
+        if (f && *f) {
+            *pSize = f->size();
+            xSemaphoreGive(mutex);
+            return (void *)f;
+        }
+
+        delete f;
+        return NULL;
     }
-    return NULL;
 }
 
 void SFS::GIFCloseFile(void *pHandle) {
-    File *f = static_cast<File *>(pHandle);
-    Serial.println(f.size());
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+        File *f = static_cast<File *>(pHandle);
+        Serial.println(f->name());
 
-    if (f != NULL) {
-        f->close();
+        if (f != NULL) {
+            f->close();
+        }
     }
 }
 
@@ -121,8 +133,10 @@ int32_t SFS::GIFReadFile(GIFFILE *pFile, uint8_t *pBuf, int32_t iLen) {
 }
 
 int32_t SFS::GIFSeekFile(GIFFILE *pFile, int32_t iPosition) {
+    int i = micros();
     File *f = static_cast<File *>(pFile->fHandle);
     f->seek(iPosition);
     pFile->iPos = (int32_t)f->position();
+    i = micros() - i;
     return pFile->iPos;
 }

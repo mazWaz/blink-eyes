@@ -4,6 +4,7 @@
 #include "webService/html_ui.h"
 
 extern SSPIFFS spiffs;  // Declare the spiffs object here
+extern SemaphoreHandle_t mutex;
 
 const char WebService::s_content_enc[] PROGMEM = "Content-Encoding";
 
@@ -15,6 +16,13 @@ void WebService::init() {
     server.serveStatic("/", SD, "/");
 
     server.begin();
+}
+
+String WebService::processor(const String &var) {
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        xSemaphoreGive(mutex);
+        return String();
+    }
 }
 
 void WebService::loop() {}

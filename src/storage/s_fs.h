@@ -5,6 +5,8 @@
 #include <SD.h>
 #include <SPI.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 class SFS {
    public:
     SFS();
@@ -26,6 +28,7 @@ class SFS {
    private:
     static const char *szFilename;
     int _chipSelectPin;
+    static File f;
 };
 
 #endif
